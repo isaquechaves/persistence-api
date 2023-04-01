@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>com.fatec.stacktec</groupId>
 			<artifactId>search-api</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${stacktec-search-api.version}</version>
 		</dependency>
 		
 		<dependency>
