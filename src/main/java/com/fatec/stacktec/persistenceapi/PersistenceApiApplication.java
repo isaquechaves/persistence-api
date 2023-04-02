@@ -1,4 +1,4 @@
-package com.fatec.stecktec.persistenceapi;
+package com.fatec.stacktec.persistenceapi;
 
 import java.util.Collections;
 
@@ -15,8 +15,8 @@ import org.springframework.security.oauth2.client.token.DefaultAccessTokenReques
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.fatec.stecktec.persistenceapi.configuration.PersistenceApiProperty;
-import com.fatec.stecktec.persistenceapi.util.KeycloakAdminRestTemplate;
+import com.fatec.stacktec.persistenceapi.configuration.PersistenceApiProperty;
+import com.fatec.stacktec.persistenceapi.util.KeycloakAdminRestTemplate;
 
 import lombok.extern.java.Log;
 

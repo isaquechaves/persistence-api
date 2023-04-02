@@ -1,4 +1,4 @@
-package com.fatec.stecktec.persistenceapi.util;
+package com.fatec.stacktec.persistenceapi.util;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;

@@ -1,4 +1,4 @@
-package com.fatec.stecktec.persistenceapi.util;
+package com.fatec.stacktec.persistenceapi.util;
 
 import java.security.Principal;
 

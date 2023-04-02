@@ -1,4 +1,4 @@
-package com.fatec.stecktec.persistenceapi.configuration;
+package com.fatec.stacktec.persistenceapi.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;

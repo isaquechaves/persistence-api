@@ -1,4 +1,4 @@
-package com.fatec.stecktec.persistenceapi.auditor;
+package com.fatec.stacktec.persistenceapi.auditor;
 
 import java.security.Principal;
 import java.util.Optional;
@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.fatec.stecktec.persistenceapi.util.AuditorUtil;
+import com.fatec.stacktec.persistenceapi.util.AuditorUtil;
 
 public class AuditorAwareImpl implements AuditorAware<String> {
 

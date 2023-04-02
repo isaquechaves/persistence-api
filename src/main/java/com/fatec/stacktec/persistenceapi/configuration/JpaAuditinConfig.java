@@ -1,11 +1,11 @@
-package com.fatec.stecktec.persistenceapi.configuration;
+package com.fatec.stacktec.persistenceapi.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-import com.fatec.stecktec.persistenceapi.auditor.AuditorAwareImpl;
+import com.fatec.stacktec.persistenceapi.auditor.AuditorAwareImpl;
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
