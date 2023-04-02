@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>com.fatec.stacktec</groupId>
 			<artifactId>search-api</artifactId>
-			<version>${stacktec-search-api.version}</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -33,6 +33,27 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>			
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.security.oauth</groupId>
+			<artifactId>spring-security-oauth2</artifactId>
+			<version>2.3.4.RELEASE</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-tomcat7-adapter</artifactId>
+			<version>4.8.1.Final</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-boot-2-adapter</artifactId>
+			<version>4.8.1.Final</version>
+			<scope>compile</scope>
 		</dependency>
 		
 		<dependency>
@@ -79,6 +100,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>			
+			<artifactId>spring-test</artifactId>			
 		</dependency>
 	</dependencies>
 	
