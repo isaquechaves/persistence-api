@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fatec.stacktec.persistenceapi.keycloak.converter.KeycloakRolesConverter;
+import com.fatec.stacktec.persistenceapi.model.keycloak.KeycloakRoles;
 import com.fatec.stacktec.persistenceapi.model.user.Permission;
 import com.fatec.stacktec.persistenceapi.service.keycloak.KeycloakRolesService;
 import com.fatec.stacktec.searchapi.util.BeanUtil;
@@ -29,5 +30,12 @@ public class KeycloakRolesEntityListener {
 			permission.setKeycloakId(keycloakPermission.getId());
 		}
 	}
-
+	
+	@PostRemove
+	public void methodExecuteAfterRemove(final Permission permission) {
+		KeycloakRolesService service = BeanUtil.getBean(KeycloakRolesService.class);
+		KeycloakRoles keycloakPermission = converter.convert(permission);
+		if(keycloakPermission != null)
+			service.removeRoles(keycloakPermission);
+	}
 }
