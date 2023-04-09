@@ -1,0 +1,53 @@
+version: "2.1"
+services:
+    web:
+      build: .
+      ports:
+          - 8080:8080
+      environment:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://db/app
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          ELASTICSEARCH_CLUSTER_NAME: elastic
+          ELASTICSEARCH_CLUSTER_NODES: elastic:9300
+          ELASTICSEARCH_CLUSTER_URL: 172.18.0.2
+          ELASTICSEARCH_USER: elastic
+          ELASTICSEARCH_PASSWORD: elastic
+      depends_on:
+          - elastic
+          - db
+
+    db:
+        image: postgres:latest
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_DB: app
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+        volumes:
+            - ./data:/var/lib/postgresql/data
+
+    elastic:
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.8.6
+        ports:
+            - 9200:9200
+            - 9300:9300
+        environment:
+            node.name: elastic-0
+            cluster.name: elastic
+            discovery.type: single-node
+            ES_JAVA_OPTS: -Xms1g -Xmx1g
+            bootstrap.memory_lock: "true"
+            xpack.security.enabled: "false"
+            xpack.monitoring.collection.enabled: "true"
+            xpack.monitoring.elasticsearch.collection.enabled: "false"
+            xpack.security.transport.ssl.enabled: "false"
+        ulimits:
+            nproc: 65536
+            nofile:
+                soft: 65536
+                hard: 65536
+            memlock:
+                soft: -1
+                hard: -1

@@ -8,21 +8,21 @@
 		<version>2.2.1.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.fatec.stecktec</groupId>
+	<groupId>com.fatec.stacktec</groupId>
 	<artifactId>persistence-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>persistence-api</name>
 	<description>Persistence API for relational and NoSQL DB</description>
 	<properties>
 		<java.version>11</java.version>
-		<stacktec-search-api.version>0.0.1-SNAPSHOT</stacktec-search-api.version>
-	    <github.global.server>github</github.global.server>
-	</properties>
+		<stacktec-search-api.version>0.0.3-SNAPSHOT</stacktec-search-api.version>	    
+	</properties>	
+	
 	<dependencies>
 		<dependency>
-			<groupId>com.fatec.stacktec</groupId>
-			<artifactId>search-api</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+		  <groupId>com.fatec.stacktec</groupId>
+		  <artifactId>search-api</artifactId>
+		  <version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -87,9 +87,14 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>1.18.20</version>
+		    <scope>provided</scope>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>6.0.8</version>
+		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
@@ -100,7 +105,10 @@
 			<artifactId>springfox-swagger2</artifactId>
 			<version>2.9.2</version>				
 		</dependency>
-		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>
@@ -116,13 +124,19 @@
 		<dependency>
 			<groupId>org.springframework</groupId>			
 			<artifactId>spring-test</artifactId>			
-		</dependency>
+		</dependency>		
 	</dependencies>
-	
+
 	<repositories>
 		<repository>
+	      <id>central</id>
+	      <url>https://repo1.maven.org/maven2</url>
+	      <releases><enabled>true</enabled></releases>
+	      <snapshots><enabled>true</enabled></snapshots>
+	    </repository>
+		<repository>
 			<id>github</id>
-			<url>https://maven.pkg.github.com/isaqueChaves/maven-repository</url>
+			<url>https://maven.pkg.github.com/isaqueChaves/maven-repository</url>				
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
@@ -130,26 +144,34 @@
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
-			</snapshots>
+			</snapshots>		
 		</repository>
 	</repositories>
 	
 	<distributionManagement>
+		<snapshotRepository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/isaqueChaves/maven-repository</url>
+		</snapshotRepository>
    		<repository>
      		<id>github</id>
-     		<name>GitHub OWNER Apache Maven Packages</name>
+     		<name>GitHub isaqueChaves Apache Maven Packages</name>
      		<url>https://maven.pkg.github.com/isaqueChaves/maven-repository</url>
    		</repository>
 	</distributionManagement>
 	
-  	<build>
+	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>				
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>     
+				<configuration>
+					<source>11</source>
+					<forceJavacCompilerUse>true</forceJavacCompilerUse>
+				</configuration>           
 			</plugin>
 		</plugins>
 	</build>
-
 	
 </project>
