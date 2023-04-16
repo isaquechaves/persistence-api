@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Dat a###
+data/
+/data/base/**
+data/pg_xact/*

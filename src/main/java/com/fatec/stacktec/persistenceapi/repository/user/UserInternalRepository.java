@@ -11,7 +11,7 @@ import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
 @Repository
 public interface UserInternalRepository extends JpaRepository<UserInternal, Long> {
 	
-	@Query("from UserInternal where lower(userSite.email) like lower(:email) ")
+	@Query("from UserInternal where lower(email) like lower(:email) ")
 	Optional<UserInternal> findByEmail(String email);		
     Boolean existsByEmail(String email);
 

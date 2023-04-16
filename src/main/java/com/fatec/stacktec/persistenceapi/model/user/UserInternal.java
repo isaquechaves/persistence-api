@@ -17,7 +17,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.Email;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -29,10 +28,12 @@ import com.fatec.stacktec.searchapi.holder.UserInternalHolder;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@EqualsAndHashCode(callSuper = true, exclude = {"roles"})
+@EqualsAndHashCode(callSuper = false, exclude = {"roles"})
+@NoArgsConstructor // Add this annotation
 @ToString(exclude = {"roles"})
 @Entity
 @Table(name = "userInternal")
@@ -43,20 +44,20 @@ public class UserInternal extends IdentityGeneratorIdentifierEntity<Long> implem
 	boolean enabled = true;
 	
 	@ManyToMany(
-			fetch = FetchType.LAZY,
-			cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},
+			fetch = FetchType.EAGER,
+			cascade = {CascadeType.MERGE},
 			targetEntity = Role.class)
 	@JoinTable(name = "userinternal_x_role",
 			joinColumns = {@JoinColumn(name = "userinternal_id")},
 			inverseJoinColumns = {@JoinColumn(name = "role_id")},
 			foreignKey = @ForeignKey(name = "fk_userinternal_role"))
+	@Fetch(FetchMode.SUBSELECT)
 	private Set<Role> roles = new HashSet<>(0);
 	
 	@Column	
 	private String apelido;
 	
 	@Column
-	@Email(message="Please provide a valid email address")
 	private String name;
 	
 	@Column
@@ -68,6 +69,10 @@ public class UserInternal extends IdentityGeneratorIdentifierEntity<Long> implem
 	@Column	
 	private SemestreType semestre;
 	
+	public UserInternal(String email, String password) {
+		this.email = email;
+		this.password = password;
+	}
 
 	@Override
 	public Optional<UserInternalHolder> populateForCache() {

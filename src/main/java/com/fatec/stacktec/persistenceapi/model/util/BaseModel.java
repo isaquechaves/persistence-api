@@ -47,7 +47,7 @@ public abstract class BaseModel<ID> implements Serializable {
 	@Column	
 	@LastModifiedBy
 	@ApiModelProperty(hidden = true)
-	protected Date UpdatedBy;
+	protected String UpdatedBy;
 	
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)

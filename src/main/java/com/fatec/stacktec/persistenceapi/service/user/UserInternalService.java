@@ -37,6 +37,11 @@ public class UserInternalService extends CrudServiceJpaImpl<UserInternalReposito
 	public UserInternal createElement(UserInternal o) {
 		return this.repository.save(o);
 	}
+	
+	@Transactional
+	public UserInternal createElementAndFlush(UserInternal o) {
+		return this.repository.save(o);
+	}
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -53,4 +58,5 @@ public class UserInternalService extends CrudServiceJpaImpl<UserInternalReposito
 	                user.getPassword(),
 	                authorities);
 	}
+		
 }

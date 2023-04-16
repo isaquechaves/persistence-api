@@ -19,11 +19,13 @@ import com.fatec.stacktec.searchapi.holder.user.RoleHolder;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
 @Table(name = "role")
 @EqualsAndHashCode(callSuper = true, exclude = "userInternal")
+@ToString(exclude = "userInternal")
 @EntityListeners({RoleEntityListener.class})
 public class Role extends IdentityGeneratorIdentifierEntity<Long> implements Serializable{
 	
@@ -35,11 +37,10 @@ public class Role extends IdentityGeneratorIdentifierEntity<Long> implements Ser
 	
 	@ManyToMany(
 			fetch = FetchType.LAZY,
-			targetEntity = UserInternal.class,
-			cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE},
+			cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
 			mappedBy = "roles")
 	private Set<UserInternal> userInternal = new HashSet<>(0);
-
+	
 	
 	@Override
 	public Optional<RoleHolder> populateForCache() {

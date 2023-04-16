@@ -1,29 +1,44 @@
 package com.fatec.stacktec.persistenceapi.controller;
 
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fatec.stacktec.persistenceapi.dto.LoginDto;
 import com.fatec.stacktec.persistenceapi.dto.SignUpDto;
+import com.fatec.stacktec.persistenceapi.exception.BusinessException;
 import com.fatec.stacktec.persistenceapi.model.user.Role;
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
+import com.fatec.stacktec.persistenceapi.payload.response.MessageResponse;
+import com.fatec.stacktec.persistenceapi.payload.response.UserInfoResponse;
 import com.fatec.stacktec.persistenceapi.repository.user.RoleRepository;
 import com.fatec.stacktec.persistenceapi.repository.user.UserInternalRepository;
+import com.fatec.stacktec.persistenceapi.security.jwt.JwtUtils;
+import com.fatec.stacktec.persistenceapi.security.services.UserDetailsImpl;
+import com.fatec.stacktec.persistenceapi.service.user.RoleService;
+import com.fatec.stacktec.persistenceapi.service.user.UserInternalService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
@@ -31,42 +46,99 @@ public class AuthController {
 
     @Autowired
     private UserInternalRepository userRepository;
+    
+    @Autowired
+    private UserInternalService userService;
+    
+    @Autowired
+    private RoleService roleService;
 
     @Autowired
     private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private ObjectMapper objectMapper;
+    
+    @Autowired
+    JwtUtils jwtUtils;
 
     @PostMapping("/signin")
-    public ResponseEntity<String> authenticateUser(@RequestBody LoginDto loginDto){
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginDto.getEmail(), loginDto.getPassword()));
+    public ResponseEntity<?> authenticateUser(@Validated @RequestBody LoginDto loginDto){    	    
+    	
+    	Authentication authentication = authenticationManager
+    	        .authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
+    	
+    	if(!loginDto.getEmail().endsWith("@fatec.sp.gov.br")) {
+    		throw new BusinessException("Email needs to end with the correct domain");
+    	}
+	    SecurityContextHolder.getContext().setAuthentication(authentication);
+	    
+	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    String name = auth.getName();
+	    
+	    //UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+	 
+	    ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(name);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>("User signed-in successfully!.", HttpStatus.OK);
+	    List<String> roles = auth.getAuthorities().stream()
+	        .map(item -> item.getAuthority())
+	        .collect(Collectors.toList());
+
+	    return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+    	        .body(new UserInfoResponse(auth.getName(),
+    	                                   roles));    	    
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpDto){
-      
-        // add check for email exists in DB
-        if(userRepository.existsByEmail(signUpDto.getEmail())){
-            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
-        }
-
-        // create user object
-        UserInternal user = new UserInternal();
-        user.setName(signUpDto.getName());
-        user.setEmail(signUpDto.getEmail());
-        user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-
-        Role roles = roleRepository.findByName("ROLE_ALUNO").get();
-        user.setRoles(Collections.singleton(roles));
-
-        userRepository.save(user);
-
-        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
-
+    public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpRequest){    	
+	    if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+	      return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+	    }	    
+	    UserInternal user = convertToModel(signUpRequest, null);
+	    
+	    UserInternal created = userService.createElementAndFlush(user);
+	    if(created != null) {
+	    	ObjectNode response = objectMapper.createObjectNode();
+	    	response.put("id", created.getId());
+	    	return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	    }else {
+	    	return ResponseEntity.noContent().build();
+	    }
     }
+
+	private UserInternal convertToModel(SignUpDto dto, UserInternal base) {
+		UserInternal user;
+		if(base == null) {
+			user = new UserInternal(dto.getEmail(), passwordEncoder.encode(dto.getPassword()));
+		}else {
+			user = base;
+		}
+        user.setApelido(dto.getApelido());
+		
+		Set<Role> rolesUser = new HashSet<>();
+		if(user != null) {
+			if(user.getRoles() != null) {
+				rolesUser = user.getRoles();
+				rolesUser.clear();
+			}
+		}
+		
+		if(dto.getRoles() != null && !dto.getRoles().isEmpty()) {
+			for(Long roleId : dto.getRoles()) {
+				Role role = null;
+				if(roleId != null && roleId >0) {
+					role = roleService.findById(roleId);
+				}
+				if(role != null) {
+					rolesUser.add(role);
+				}
+			}
+		}
+		user.setRoles(rolesUser);
+		
+		return user;
+	}
 }
