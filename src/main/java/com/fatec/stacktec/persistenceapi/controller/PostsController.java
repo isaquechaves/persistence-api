@@ -24,20 +24,14 @@ import com.fatec.stacktec.persistenceapi.service.user.UserInternalService;
 public class PostsController {
 	
 	@Autowired
-    private UserInternalService userServicePost;
+    private PostService postService;
 	
 	@Autowired
-    private UserInternalRepository userRepositoryPost;
+    private PostRepository postRepository;
 	
 	
 	@GetMapping("/user")
-	public ResponseEntity<?> getUser(@RequestBody LoginDto loginDto) {
-		UserInternal user = userServicePost.findByEmail(loginDto.getEmail());
-		
-		List<String> roles = user.getRoles().stream()
-		        .map(item -> item.getName())
-		        .collect(Collectors.toList());
-		
-		return ResponseEntity.ok().body(new UserInfoResponse(user.getEmail(), roles));
+	public ResponseEntity<?> getUser(@RequestBody LoginDto loginDto) {					
+		return ResponseEntity.ok().body();
 	}
 }

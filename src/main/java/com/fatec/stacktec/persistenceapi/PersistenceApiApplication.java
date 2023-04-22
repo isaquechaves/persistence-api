@@ -1,6 +1,10 @@
 package com.fatec.stacktec.persistenceapi;
 
 
+import java.util.TimeZone;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -30,4 +34,10 @@ public class PersistenceApiApplication {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 	    return new PropertySourcesPlaceholderConfigurer();
 	}
+	
+   @PostConstruct
+    public void init(){
+      // Setting Spring Boot SetTimeZone
+      TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
+    }
 }

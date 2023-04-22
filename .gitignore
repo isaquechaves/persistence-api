@@ -35,4 +35,10 @@ build/
 ### Dat a###
 data/
 /data/base/**
+data/pg_xact/**
 data/pg_xact/*
+data/base/*
+data/base/5/*
+data/pg_xact/*
+data/base/*
+data/base/5/*

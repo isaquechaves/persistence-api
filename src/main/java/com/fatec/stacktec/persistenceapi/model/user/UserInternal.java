@@ -16,12 +16,14 @@ import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import com.fatec.stacktec.persistenceapi.listener.user.UserInternalEntityListener;
+import com.fatec.stacktec.persistenceapi.model.post.Post;
 import com.fatec.stacktec.persistenceapi.model.util.IdentityGeneratorIdentifierEntity;
 import com.fatec.stacktec.searchapi.enumeration.SemestreType;
 import com.fatec.stacktec.searchapi.holder.UserInternalHolder;
@@ -32,9 +34,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@EqualsAndHashCode(callSuper = false, exclude = {"roles"})
+@EqualsAndHashCode(callSuper = false, exclude = {"roles", "posts"})
 @NoArgsConstructor // Add this annotation
-@ToString(exclude = {"roles"})
+@ToString(exclude = {"roles", "posts"})
 @Entity
 @Table(name = "userInternal")
 @EntityListeners({UserInternalEntityListener.class})
@@ -68,6 +70,11 @@ public class UserInternal extends IdentityGeneratorIdentifierEntity<Long> implem
 	
 	@Column	
 	private SemestreType semestre;
+	
+	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
+			fetch = FetchType.LAZY, mappedBy = "autor",
+			orphanRemoval = true)
+	private Set<Post> posts = new HashSet<>(0);
 	
 	public UserInternal(String email, String password) {
 		this.email = email;
