@@ -13,25 +13,49 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fatec.stacktec.persistenceapi.dto.LoginDto;
+import com.fatec.stacktec.persistenceapi.dto.post.PostDto;
+import com.fatec.stacktec.persistenceapi.model.post.Post;
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
 import com.fatec.stacktec.persistenceapi.payload.response.UserInfoResponse;
+import com.fatec.stacktec.persistenceapi.repository.post.PostRepository;
 import com.fatec.stacktec.persistenceapi.repository.user.UserInternalRepository;
+import com.fatec.stacktec.persistenceapi.service.post.PostService;
 import com.fatec.stacktec.persistenceapi.service.user.UserInternalService;
+
+import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping("/api/post")
+@Api(value = "PostRelacional", description = "post api", tags = {"Post"})
 @Validated
-public class PostsController {
+public class PostControllerRelacional extends BaseController<PostService, Post, PostDto>{
 	
-	@Autowired
-    private PostService postService;
-	
-	@Autowired
-    private PostRepository postRepository;
+    private final PostService postService;
 	
 	
-	@GetMapping("/user")
-	public ResponseEntity<?> getUser(@RequestBody LoginDto loginDto) {					
-		return ResponseEntity.ok().body();
+	public PostControllerRelacional(PostService postService){
+		this.postService = postService;
 	}
+
+
+	@Override
+	protected List<?> convertToListDto(List<Post> elements) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	protected Object convertToDetailDto(Post element) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	protected Post convertToModel(PostDto dto) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+		
 }

@@ -6,6 +6,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.Cache.ValueWrapper;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -37,7 +40,11 @@ import com.fatec.stacktec.persistenceapi.security.services.UserDetailsImpl;
 import com.fatec.stacktec.persistenceapi.service.user.RoleService;
 import com.fatec.stacktec.persistenceapi.service.user.UserInternalService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @RestController
+@Api(value = "Auth", description = "auth api", tags = {"Auth"})
 @RequestMapping("/auth")
 public class AuthController {
 
@@ -63,11 +70,31 @@ public class AuthController {
     private ObjectMapper objectMapper;
     
     @Autowired
+    private CacheManager cacheManager;
+    
+    @Autowired
     JwtUtils jwtUtils;
-
+    
+    @ApiOperation(value = "Authenticate user")
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Validated @RequestBody LoginDto loginDto){    	    
     	
+    	Cache cache = cacheManager.getCache("usersCache");
+	    String cacheKey = loginDto.getEmail();
+	    ValueWrapper valueWrapper = cache.get(cacheKey);	    	    
+	    if (valueWrapper != null) {
+	        // User is already authenticated, return the cached token
+
+		    String username = jwtUtils.getUserNameFromJwtToken((String)valueWrapper.get());
+		    UserInternal userInternal = userService.findByEmail(username);	 
+	        String token = (String) valueWrapper.get();
+	        List<String> roles = userInternal.getRoles().stream()
+	    	        .map(item -> item.getName())
+	    	        .collect(Collectors.toList());
+	        
+	        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, token).body(new UserInfoResponse(userInternal.getEmail(), roles)); 
+	    }
+	    	        	
     	Authentication authentication = authenticationManager
     	        .authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
     	
@@ -86,12 +113,17 @@ public class AuthController {
 	    List<String> roles = auth.getAuthorities().stream()
 	        .map(item -> item.getAuthority())
 	        .collect(Collectors.toList());
+	    
+	    //Store JWT in Cache
+	    cache.put(cacheKey, jwtCookie.getValue());
 
 	    return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-    	        .body(new UserInfoResponse(auth.getName(),
-    	                                   roles));    	    
+	        .body(new UserInfoResponse(auth.getName(), roles)); 
+	    
+	    	    	      
     }
 
+    @ApiOperation(value = "Register user")
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpRequest){    	
 	    if (userRepository.existsByEmail(signUpRequest.getEmail())) {

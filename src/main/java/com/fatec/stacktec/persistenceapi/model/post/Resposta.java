@@ -55,7 +55,7 @@ public class Resposta extends IdentityGeneratorIdentifierEntity<Long> implements
 	private UserInternal autor;
 	
 	@Column
-	private Integer upvotes;
+	private Integer votos;
 	
 	@Column
 	private Boolean aceita;
