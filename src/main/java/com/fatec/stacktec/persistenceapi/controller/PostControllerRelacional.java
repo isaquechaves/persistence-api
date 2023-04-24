@@ -54,7 +54,13 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 
 	@Override
 	protected Post convertToModel(PostDto dto) {
-		// TODO Auto-generated method stub
+		return this.convertToModel(null, dto);
+	}
+	
+	protected Post convertToModel(Object object, PostDto dto) {
+		Post post = modelMapper.map(dto, Post.class);
+		
+		//Set<ImagePost> images = new HashSet<>();
 		return null;
 	}
 		

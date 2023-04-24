@@ -1,10 +1,12 @@
 package com.fatec.stacktec.persistenceapi.controller;
 
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
@@ -18,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fatec.stacktec.persistenceapi.dto.LoginDto;
-import com.fatec.stacktec.persistenceapi.dto.SignUpDto;
+import com.fatec.stacktec.persistenceapi.dto.UserInternalDto;
+import com.fatec.stacktec.persistenceapi.dto.UserInternalDtoMinimal;
+import com.fatec.stacktec.persistenceapi.dto.UserInternalToListDto;
 import com.fatec.stacktec.persistenceapi.exception.BusinessException;
 import com.fatec.stacktec.persistenceapi.model.user.Role;
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
@@ -36,8 +41,6 @@ import com.fatec.stacktec.persistenceapi.payload.response.UserInfoResponse;
 import com.fatec.stacktec.persistenceapi.repository.user.RoleRepository;
 import com.fatec.stacktec.persistenceapi.repository.user.UserInternalRepository;
 import com.fatec.stacktec.persistenceapi.security.jwt.JwtUtils;
-import com.fatec.stacktec.persistenceapi.security.services.UserDetailsImpl;
-import com.fatec.stacktec.persistenceapi.service.user.RoleService;
 import com.fatec.stacktec.persistenceapi.service.user.UserInternalService;
 
 import io.swagger.annotations.Api;
@@ -46,7 +49,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @Api(value = "Auth", description = "auth api", tags = {"Auth"})
 @RequestMapping("/auth")
-public class AuthController {
+public class AuthController extends BaseController<UserInternalService, UserInternal, UserInternalDto>{
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -57,8 +60,6 @@ public class AuthController {
     @Autowired
     private UserInternalService userService;
     
-    @Autowired
-    private RoleService roleService;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -125,11 +126,13 @@ public class AuthController {
 
     @ApiOperation(value = "Register user")
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpRequest){    	
+    @Override
+    public ResponseEntity createElement(Principal principal, @RequestBody UserInternalDto signUp){ 
+    	UserInternalDtoMinimal signUpRequest = modelMapper.map(signUp, UserInternalDtoMinimal.class);
 	    if (userRepository.existsByEmail(signUpRequest.getEmail())) {
 	      return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
 	    }	    
-	    UserInternal user = convertToModel(signUpRequest, null);
+	    UserInternal user = convertToModelCreate(signUpRequest, null);
 	    
 	    UserInternal created = userService.createElementAndFlush(user);
 	    if(created != null) {
@@ -140,37 +143,57 @@ public class AuthController {
 	    	return ResponseEntity.noContent().build();
 	    }
     }
-
-	private UserInternal convertToModel(SignUpDto dto, UserInternal base) {
-		UserInternal user;
-		if(base == null) {
-			user = new UserInternal(dto.getEmail(), passwordEncoder.encode(dto.getPassword()));
-		}else {
-			user = base;
-		}
+    
+	private UserInternal convertToModelCreate(UserInternalDtoMinimal dto, UserInternal base) {
+		UserInternal user = new UserInternal(dto.getEmail(), passwordEncoder.encode(dto.getPassword()));
+		
         user.setApelido(dto.getApelido());
 		
 		Set<Role> rolesUser = new HashSet<>();
-		if(user != null) {
-			if(user.getRoles() != null) {
-				rolesUser = user.getRoles();
-				rolesUser.clear();
-			}
-		}
-		
-		if(dto.getRoles() != null && !dto.getRoles().isEmpty()) {
-			for(Long roleId : dto.getRoles()) {
-				Role role = null;
-				if(roleId != null && roleId >0) {
-					role = roleService.findById(roleId);
-				}
-				if(role != null) {
-					rolesUser.add(role);
-				}
-			}
-		}
+		rolesUser.add(roleRepository.findByName("ROLE_USER"));
 		user.setRoles(rolesUser);
+			
+		user.setRoles(rolesUser);
+		user.setName(dto.getName());
+		user.setSemestre(dto.getSemestre());
 		
 		return user;
+	}
+	
+	private UserInternal convertToModel(UserInternalDto dto, UserInternal base) {
+		UserInternal user;
+		if(base != null &&  !ObjectUtils.isEmpty(base)) {
+			user = base;
+		}else { 
+			user = new UserInternal(dto.getEmail(), passwordEncoder.encode(dto.getPassword()));
+		}
+		
+        user.setApelido(dto.getApelido());
+		
+		Set<Role> rolesUser = new HashSet<>();
+		for(String roleName : dto.getRoles()) {
+			rolesUser.add(roleRepository.findByName(roleName));
+		}			
+		user.setRoles(rolesUser);
+		user.setName(dto.getName());
+		user.setSemestre(dto.getSemestre());
+		user.setPassword(passwordEncoder.encode(dto.getPassword()));
+		return user;
+	}
+
+	@Override
+	protected List<?> convertToListDto(List<UserInternal> elements) {
+		return modelMapper.map(elements,  new TypeToken<List<UserInternalToListDto>>() {}.getType());
+	}
+
+	@Override
+	protected Object convertToDetailDto(UserInternal element) {
+		UserInternalToListDto userInternalDto = modelMapper.map(element, UserInternalToListDto.class);
+		return userInternalDto;
+	}
+
+	@Override
+	protected UserInternal convertToModel(UserInternalDto dto) {
+		return convertToModel(dto, null);
 	}
 }

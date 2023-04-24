@@ -8,5 +8,6 @@ import com.fatec.stacktec.persistenceapi.service.CrudServiceJpaImpl;
 
 @Service
 public class RoleService extends CrudServiceJpaImpl<RoleRepository, Role>{
+		
 
 }
