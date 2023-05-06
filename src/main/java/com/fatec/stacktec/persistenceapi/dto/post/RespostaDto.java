@@ -16,23 +16,21 @@ import lombok.NoArgsConstructor;
 @ApiModel(value = "RespostaDetail", description = "Sample model for post detail")
 public class RespostaDto {
 	
+	@JsonProperty
+	private Long id;
 	
+	@JsonProperty
 	private String descricao;
 	
-	
+	@JsonProperty
 	private Long autor;
 	
-	
+	@JsonProperty
 	private Integer votos;
 	
-	
+	@JsonProperty
 	private Boolean aceita;
-	
-	private Long post;
-	
-	@JsonProperty 
-	private List<RespostaImageDto> images;
-	
+
 	@JsonProperty
 	private List<RespostaComentarioDto> comentarios;
 	

@@ -1,8 +1,9 @@
 package com.fatec.stacktec.persistenceapi.dto.post;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
@@ -19,29 +20,26 @@ public class PostDto {
 	@JsonProperty
 	private Long id;
 	
+	@JsonProperty
+	private Long autorId;	
+	
 	@JsonProperty 
 	private String titulo;
 	
 	@JsonProperty 
-	private String descricao;
+	private String descricao;	
+	
+	@JsonIgnore
+	private Set<PostComentarioDto> comentarios;
 	
 	@JsonProperty 
-	private Long autor;
+	private Set<TagDto> tags;
+	
+	@JsonIgnore
+	private Set<RespostaDto> respostas;	
 	
 	@JsonProperty 
-	private List<PostImageDto> images;
-	
-	@JsonProperty 
-	private List<PostComentarioDto> comentarios;
-	
-	@JsonProperty 
-	private List<PostTagDto> tags;
-	
-	@JsonProperty 
-	private List<RespostaDto> respostas;	
-	
-	@JsonProperty 
-	private Long disciplina;
+	private Long disciplinaId;
 	
 	@JsonProperty 
 	private Date criadoEm;

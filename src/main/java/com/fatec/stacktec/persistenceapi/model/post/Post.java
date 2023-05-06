@@ -12,8 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
@@ -28,7 +26,6 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.security.core.annotation.CurrentSecurityContext;
 
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
 import com.fatec.stacktec.persistenceapi.model.util.IdentityGeneratorIdentifierEntity;
@@ -65,13 +62,8 @@ public class Post extends IdentityGeneratorIdentifierEntity<Long> implements Ser
 	
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "post_id", foreignKey = @ForeignKey(name = "fk_autor_post"))
-	private UserInternal autor;
-	
-	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
-			fetch = FetchType.LAZY, mappedBy = "post",
-			orphanRemoval = true)
-	private Set<ImagePost> images = new HashSet<>(0);
+	@JoinColumn(name = "autor_id", foreignKey = @ForeignKey(name = "fk_autor_post"))
+	private UserInternal autor;	
 	
 	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
 			fetch = FetchType.LAZY, mappedBy = "post",

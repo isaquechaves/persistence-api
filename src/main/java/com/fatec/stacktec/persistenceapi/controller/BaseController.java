@@ -118,7 +118,7 @@ public abstract class BaseController<K extends CrudService, MODEL, DTO> {
 		if(elementUpdated != null) {
 			ObjectNode response = objectMapper.createObjectNode();
 			response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
-			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+			return ResponseEntity.status(HttpStatus.OK).body(response);
 		}
 		
 		return ResponseEntity.noContent().build();

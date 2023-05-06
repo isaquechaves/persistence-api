@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import com.fatec.stacktec.persistenceapi.security.jwt.AuthEntryPointJwt;
 import com.fatec.stacktec.persistenceapi.security.jwt.AuthTokenFilter;
@@ -62,6 +63,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
+	
+	@Bean(name = "multipartResolver")
+	public CommonsMultipartResolver commonsMultipartResolver() {
+	    CommonsMultipartResolver resolver = new CommonsMultipartResolver();
+	    resolver.setDefaultEncoding("UTF-8");
+	    resolver.setMaxUploadSize(5242880);
+	    return resolver;
+	}
+
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {

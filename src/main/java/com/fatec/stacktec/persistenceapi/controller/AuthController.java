@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -20,9 +22,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +41,7 @@ import com.fatec.stacktec.persistenceapi.dto.UserInternalToListDto;
 import com.fatec.stacktec.persistenceapi.exception.BusinessException;
 import com.fatec.stacktec.persistenceapi.model.user.Role;
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
+import com.fatec.stacktec.persistenceapi.model.util.BaseModel;
 import com.fatec.stacktec.persistenceapi.payload.response.MessageResponse;
 import com.fatec.stacktec.persistenceapi.payload.response.UserInfoResponse;
 import com.fatec.stacktec.persistenceapi.repository.user.RoleRepository;
@@ -60,7 +66,6 @@ public class AuthController extends BaseController<UserInternalService, UserInte
     @Autowired
     private UserInternalService userService;
     
-
     @Autowired
     private RoleRepository roleRepository;
 
@@ -85,7 +90,6 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	    ValueWrapper valueWrapper = cache.get(cacheKey);	    	    
 	    if (valueWrapper != null) {
 	        // User is already authenticated, return the cached token
-
 		    String username = jwtUtils.getUserNameFromJwtToken((String)valueWrapper.get());
 		    UserInternal userInternal = userService.findByEmail(username);	 
 	        String token = (String) valueWrapper.get();
@@ -142,6 +146,32 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	    }else {
 	    	return ResponseEntity.noContent().build();
 	    }
+    }
+    
+    @PutMapping("/v1.1/{id}")
+	@Transactional
+    public ResponseEntity updateElement(@PathVariable(value = "id") Long id,
+										@Valid @RequestBody UserInternalDto userInternalDto) {
+    	
+    	Cache cache = cacheManager.getCache("usersCache");
+	    String cacheKey = userInternalDto.getEmail();
+	    ValueWrapper valueWrapper = cache.get(cacheKey);	    	    
+	    if (valueWrapper != null) {
+	        // User is already authenticated, return the cached token
+		    String username = jwtUtils.getUserNameFromJwtToken((String)valueWrapper.get());
+	        if(username.equals(userInternalDto.getEmail())){
+	        	UserInternal converted = convertToModel(userInternalDto);
+	    		UserInternal elementUpdated = (UserInternal) userService.updateElement(id, converted);
+	    		if(elementUpdated != null) {
+	    			ObjectNode response = objectMapper.createObjectNode();
+	    			response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
+	    			return ResponseEntity.status(HttpStatus.OK).body(response);
+	    		}
+	        }else {
+	        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	        }
+	    }
+    	return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     
 	private UserInternal convertToModelCreate(UserInternalDtoMinimal dto, UserInternal base) {

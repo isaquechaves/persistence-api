@@ -1,12 +1,17 @@
 package com.fatec.stacktec.persistenceapi.security.jwt;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.FileItemStream;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.util.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +36,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-		try {
+			throws ServletException, IOException {	        
+		try {			
 			String jwt = parseJwt(request);
 			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 				String username = jwtUtils.getUserNameFromJwtToken(jwt);
@@ -53,6 +58,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 		}
 
 		filterChain.doFilter(request, response);
+	}
+	
+	private boolean isMultipartRequest(HttpServletRequest request) {
+	    return request.getContentType() != null && request.getContentType().toLowerCase().startsWith("multipart/");
 	}
 
 	private String parseJwt(HttpServletRequest request) {

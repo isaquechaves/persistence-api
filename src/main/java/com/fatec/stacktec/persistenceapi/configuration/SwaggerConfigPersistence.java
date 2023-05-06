@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.collect.Sets;
+
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -34,9 +36,11 @@ public class SwaggerConfigPersistence {
 				.securityContexts(Arrays.asList(securityContext()))
 				.select()
 					.apis(RequestHandlerSelectors.basePackage("com.fatec.stacktec.persistenceapi.controller"))
-					.paths(PathSelectors.any())
+					.paths(PathSelectors.any())					
 				.build()
-				.apiInfo(new ApiInfoBuilder().version("1.0").title("StackTec persistence API").description("Documentation API v1.0").build());				
+				.apiInfo(new ApiInfoBuilder().version("1.0").title("StackTec persistence API").description("Documentation API v1.0").build())
+				.consumes(Sets.newHashSet("multipart/form-data", "application/json"))
+		        .produces(Sets.newHashSet("application/json"));				
 	}
 	
 	  @Bean

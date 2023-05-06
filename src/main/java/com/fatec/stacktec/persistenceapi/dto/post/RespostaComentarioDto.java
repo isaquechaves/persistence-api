@@ -1,5 +1,6 @@
 package com.fatec.stacktec.persistenceapi.dto.post;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -11,20 +12,19 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(value = "PressKitDetail", description = "Sample model for comentario resposta detail")
+@ApiModel(value = "RespostaComentarioDetail", description = "Sample model for comentario resposta detail")
 public class RespostaComentarioDto {
-	
-	
-	@JsonProperty
-	private Long id;
-	
-	@JsonIgnore
-	private Long respostaId;
-	
-	@JsonProperty
-	private Long autor;
-	
-	@JsonProperty
-	private String texto;
-		 
-}
+
+		@JsonProperty
+		private Long id;
+		
+		@JsonIgnore
+		private Long respostaId;
+		
+		@JsonProperty
+		private Long autor;
+		
+		@JsonProperty
+		private String texto;
+			 
+	}
