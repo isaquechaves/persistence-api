@@ -1,5 +1,6 @@
-package com.fatec.stacktec.persistenceapi.controller;
+package com.fatec.stacktec.persistenceapi.controller.post;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -14,12 +15,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fatec.stacktec.persistenceapi.controller.BaseController;
 import com.fatec.stacktec.persistenceapi.dto.post.PostComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.PostDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaDto;
@@ -72,7 +77,21 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 	}
 
 	
-	@ApiOperation(value = "Upload post and image")
+	@ApiOperation(value = "Get post by id")
+	@GetMapping("/v1.1/{id}")
+	@Transactional(readOnly = true)
+	public ResponseEntity getPostById(@PathVariable(value = "id") Long elementId) {
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		Post element = (Post) service.findById(elementId);
+		if(element != null) {
+			return ResponseEntity.ok(convertToDetailDto(element));
+		}		
+		return ResponseEntity.noContent().build();
+	}
+	
+	@ApiOperation(value = "Upload post")
 	@PostMapping("/v1.1/create")
 	@Transactional
 	public ResponseEntity createElement(@Valid @RequestBody PostDto postDto) {
@@ -91,6 +110,25 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		return ResponseEntity.noContent().build();
 	}
 	
+	@ApiOperation(value = "Update post")
+	@PutMapping("/v1.1/update/{id}")
+	@Transactional
+	public ResponseEntity updatePost(@PathVariable(value = "id") Long postId, @Valid @RequestBody PostDto postDto) {
+				
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		Post converted = postService.updatePost(modelMapper, postDto);
+		Post elementUpdated = (Post) postService.updateElement(postId, converted);
+		if(elementUpdated != null) {						
+			ObjectNode response = objectMapper.createObjectNode();								
+			response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		}
+		
+		return ResponseEntity.noContent().build();
+	}
+		
 
 
 	@Override
@@ -116,7 +154,23 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 			post.setAutor(autor);
 		}
 		
+		if(post.getTags() != null) {
+			Set<Tag> listTags = new HashSet<>();
+			for(Tag tag: post.getTags()) {
+				listTags.add(tag);
+			}
+			post.setTags(listTags);
+		}
+		
 		PostDto postDto = modelMapper.map(post, PostDto.class);
+		
+		if(post.getTags() != null) {
+			Set<String> listTagsDto = new HashSet<>();
+			for(Tag tag: post.getTags()) {
+				listTagsDto.add(tag.getNome());
+			}
+			postDto.setTags(listTagsDto);
+		}
 		
 		if(disciplina != null) {
 			postDto.setDisciplinaId(post.getDisciplina().getId());
@@ -166,32 +220,8 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		}
 		
 		
-		Set<TagDto> tagDtoList = dto.getTags();
-		dto.setRespostas(null);
-		
-		if(tagDtoList != null) {
-			Set<Tag> tagList = new HashSet<>(0);
-			for(TagDto tagDto : tagDtoList) {
-				Tag tag = tagService.findById(tagDto.getId());
-				if(tag != null) {
-					tagList.add(tag);
-				}
-			}
-			if(tagsPost != null) {
-				tagsPost.clear();
-				tagsPost.addAll(tagList);
-			}else {
-				tagsPost = tagList;
-			}
-		}else {
-			if(tagsPost != null) {
-				tagsPost.clear();
-			}else {
-				tagsPost = new HashSet<>(0);
-			}
-		}
+		tagsPost = postService.findTagsByName(dto.getTags()); 				
 		post.setTags(tagsPost);
-		
 		
 		Set<RespostaDto> respostaDtoList = dto.getRespostas();
 		dto.setRespostas(null);

@@ -1,8 +1,9 @@
 package com.fatec.stacktec.persistenceapi.dto.post;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModel;
@@ -23,7 +24,10 @@ public class RespostaDto {
 	private String descricao;
 	
 	@JsonProperty
-	private Long autor;
+	private Long postId;
+	
+	@JsonProperty
+	private Long autorId;
 	
 	@JsonProperty
 	private Integer votos;
@@ -31,11 +35,12 @@ public class RespostaDto {
 	@JsonProperty
 	private Boolean aceita;
 
-	@JsonProperty
-	private List<RespostaComentarioDto> comentarios;
+	@JsonIgnore
+	private Set<RespostaComentarioDto> comentarios;
 	
+	@JsonIgnore
 	private Date criadoEm;
 	
-	@JsonProperty 
+	@JsonIgnore
 	private Date atualizadoEm;
 }

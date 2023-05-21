@@ -37,8 +37,8 @@ import lombok.ToString;
 
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = false, exclude = {"images", "comentarios"})
-@ToString(exclude = {"images", "comentarios"})
+@EqualsAndHashCode(callSuper = false)
+@ToString()
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "resposta")
@@ -51,7 +51,9 @@ public class Resposta extends IdentityGeneratorIdentifierEntity<Long> implements
 	@Type(type = "org.hibernate.type.TextType")
 	private String descricao;
 		
-	@Column
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "autor_id", foreignKey = @ForeignKey(name = "fk_autor_resposta"))
 	private UserInternal autor;
 	
 	@Column
@@ -64,11 +66,6 @@ public class Resposta extends IdentityGeneratorIdentifierEntity<Long> implements
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id", foreignKey = @ForeignKey(name = "fk_resposta_post"))
 	private Post post;
-	
-	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
-			fetch = FetchType.LAZY, mappedBy = "resposta",
-			orphanRemoval = true)
-	private Set<ImageResposta> images = new HashSet<>(0);
 	
 	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
 			fetch = FetchType.LAZY, mappedBy = "resposta",

@@ -24,6 +24,7 @@ import org.hibernate.annotations.FetchMode;
 
 import com.fatec.stacktec.persistenceapi.listener.user.UserInternalEntityListener;
 import com.fatec.stacktec.persistenceapi.model.post.Post;
+import com.fatec.stacktec.persistenceapi.model.post.Resposta;
 import com.fatec.stacktec.persistenceapi.model.util.IdentityGeneratorIdentifierEntity;
 import com.fatec.stacktec.searchapi.enumeration.SemestreType;
 import com.fatec.stacktec.searchapi.holder.UserInternalHolder;
@@ -34,9 +35,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@EqualsAndHashCode(callSuper = false, exclude = {"roles", "posts"})
+@EqualsAndHashCode(callSuper = false, exclude = {"roles", "posts", "respostas"})
 @NoArgsConstructor // Add this annotation
-@ToString(exclude = {"roles", "posts"})
+@ToString(exclude = {"roles", "posts", "respostas"})
 @Entity
 @Table(name = "userInternal")
 @EntityListeners({UserInternalEntityListener.class})
@@ -75,6 +76,11 @@ public class UserInternal extends IdentityGeneratorIdentifierEntity<Long> implem
 			fetch = FetchType.LAZY, mappedBy = "autor",
 			orphanRemoval = true)
 	private Set<Post> posts = new HashSet<>(0);
+	
+	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
+			fetch = FetchType.LAZY, mappedBy = "autor",
+			orphanRemoval = true)
+	private Set<Resposta> respostas = new HashSet<>(0);
 	
 	public UserInternal(String email, String password) {
 		this.email = email;

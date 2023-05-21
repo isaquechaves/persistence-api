@@ -33,7 +33,7 @@ public class PostDto {
 	private Set<PostComentarioDto> comentarios;
 	
 	@JsonProperty 
-	private Set<TagDto> tags;
+	private Set<String> tags;
 	
 	@JsonIgnore
 	private Set<RespostaDto> respostas;	

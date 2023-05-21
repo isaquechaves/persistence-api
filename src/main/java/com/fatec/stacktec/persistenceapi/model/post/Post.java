@@ -41,8 +41,7 @@ import lombok.ToString;
 //@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = false, exclude = {"tags", "images"})
-@ToString(exclude = {"images"})
+@EqualsAndHashCode(callSuper = false, exclude = {"tags"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "post")
@@ -52,6 +51,7 @@ public class Post extends IdentityGeneratorIdentifierEntity<Long> implements Ser
 	@NotNull
 	@Column
 	@Lob
+	@Type(type = "org.hibernate.type.TextType")
 	private String titulo;
 	
 	@NotNull
