@@ -15,15 +15,17 @@
 	<description>Persistence API for relational and NoSQL DB</description>
 	<properties>
 		<java.version>11</java.version>
-		<stacktec-search-api.version>0.0.3-SNAPSHOT</stacktec-search-api.version>	    
+		<!--<stacktec-search-api.version>0.0.3-SNAPSHOT</stacktec-search-api.version> -->	    
 	</properties>	
 	
 	<dependencies>
+		<!--
 		<dependency>
 		  <groupId>com.fatec.stacktec</groupId>
 		  <artifactId>search-api</artifactId>
 		  <version>0.0.3-SNAPSHOT</version>
 		</dependency>
+		-->
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

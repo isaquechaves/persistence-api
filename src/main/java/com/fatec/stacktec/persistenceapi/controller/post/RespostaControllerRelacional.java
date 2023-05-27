@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +44,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.java.Log;
 
 @Log
+@CrossOrigin
 @RestController
 @RequestMapping("/api/resposta")
 @Api(value = "RespostaRelacional", description = "resposta api", tags = {"Resposta"})
@@ -138,18 +140,13 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 		
 		if(resposta.getAutor() != null) {
 			autor = resposta.getAutor();
-			resposta.setAutor(autor);
+			resposta.setAutor(null);
 		}	
 		
 		if(resposta.getPost() != null) {
 			post = resposta.getPost();
-			resposta.setPost(post);
-		}	
-		
-		if(resposta.getPost() != null) {
-			post = resposta.getPost();
-			resposta.setPost(post);
-		}
+			resposta.setPost(null);
+		}			
 		
 		if(resposta.getComentarios() != null) {
 			Set<Comentario> listComentario = new HashSet<>(0);
@@ -161,11 +158,11 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 		
 		RespostaDto respostaDto = modelMapper.map(resposta, RespostaDto.class);								
 		if(autor != null) {
-			respostaDto.setAutorId(resposta.getAutor().getId());
+			respostaDto.setAutorId(autor.getId());
 		}	
 		
 		if(post != null) {
-			respostaDto.setPostId(resposta.getPost().getId());
+			respostaDto.setPostId(post.getId());
 		}	
 		return respostaDto;
 	}	

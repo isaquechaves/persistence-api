@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ import com.fatec.stacktec.persistenceapi.service.CrudService;
 
 import io.swagger.annotations.ApiOperation;
 
+@CrossOrigin
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public abstract class BaseController<K extends CrudService, MODEL, DTO> {
 	

@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.AbstractApplicationContext;
 
-import com.fatec.stacktec.searchapi.search.ESBaseStoreServiceImpl;
 
 import lombok.Setter;
 import lombok.extern.java.Log;
@@ -41,11 +40,7 @@ public class FlywayMigrationConfig {
 			if(migrated > 0) {
 				ConfigurableListableBeanFactory listableBeanFactory = ((AbstractApplicationContext) applicationContext).getBeanFactory();
 				for(String name : applicationContext.getBeanDefinitionNames()) {
-					Object s = listableBeanFactory.getSingleton(name);
-					if(s instanceof ESBaseStoreServiceImpl) {
-						((ESBaseStoreServiceImpl) s).deleteAll();
-						((ESBaseStoreServiceImpl) s).getInitialElements();
-					}
+					Object s = listableBeanFactory.getSingleton(name);					
 				}
 			}
 		}

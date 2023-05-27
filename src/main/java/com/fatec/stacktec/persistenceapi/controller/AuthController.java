@@ -25,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -53,6 +54,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
+@CrossOrigin
 @Api(value = "Auth", description = "auth api", tags = {"Auth"})
 @RequestMapping("/auth")
 public class AuthController extends BaseController<UserInternalService, UserInternal, UserInternalDto>{

@@ -1,9 +1,7 @@
 package com.fatec.stacktec.persistenceapi.model.post;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -17,7 +15,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
 import com.fatec.stacktec.persistenceapi.model.util.IdentityGeneratorIdentifierEntity;
 
 import lombok.AllArgsConstructor;
@@ -49,10 +46,5 @@ public class Disciplina extends IdentityGeneratorIdentifierEntity<Long> implemen
 			orphanRemoval = false)
 	@JsonIgnore
 	private Set<Post> posts = new HashSet<>(0);
-	
-	@Override
-	public Optional populateForCache() {	
-		return Optional.empty();
-	}
 
 }

@@ -3,7 +3,6 @@ package com.fatec.stacktec.persistenceapi.model.post;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -12,16 +11,13 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
@@ -42,7 +38,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "resposta")
-//@EntityListeners
 public class Resposta extends IdentityGeneratorIdentifierEntity<Long> implements Serializable{
 		
 	@NotNull
@@ -80,8 +75,4 @@ public class Resposta extends IdentityGeneratorIdentifierEntity<Long> implements
 	@UpdateTimestamp
 	private Date atualizadoEm;
 
-	@Override
-	public Optional populateForCache() {
-		return Optional.empty();
-	}
 }

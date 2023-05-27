@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,12 +43,12 @@ import com.fatec.stacktec.persistenceapi.service.post.PostService;
 import com.fatec.stacktec.persistenceapi.service.post.RespostaService;
 import com.fatec.stacktec.persistenceapi.service.post.TagService;
 import com.fatec.stacktec.persistenceapi.service.user.UserInternalService;
-import com.fatec.stacktec.searchapi.dto.ComentariosDto;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/post")
 @Api(value = "PostRelacional", description = "post api", tags = {"Post"})
 @Validated
@@ -147,11 +148,11 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		
 		if(post.getDisciplina() != null) {
 			disciplina = post.getDisciplina();
-			post.setDisciplina(disciplina);
+			post.setDisciplina(null);
 		}
 		if(post.getAutor() != null) {
 			autor = post.getAutor();
-			post.setAutor(autor);
+			post.setAutor(null);
 		}
 		
 		if(post.getTags() != null) {
@@ -173,11 +174,11 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		}
 		
 		if(disciplina != null) {
-			postDto.setDisciplinaId(post.getDisciplina().getId());
+			postDto.setDisciplinaId(disciplina.getId());
 		}
 		
 		if(autor != null) {
-			postDto.setAutorId(post.getAutor().getId());
+			postDto.setAutorId(autor.getId());
 		}
 		
 		return postDto;

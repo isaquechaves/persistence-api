@@ -90,4 +90,9 @@ public class RespostaService extends CrudServiceJpaImpl<RespostaRepository, Resp
 		return resposta;
 	}
 
+
+	public Optional<Resposta> getById(Long id) {
+		return repository.getById(id);
+	}
+
 }

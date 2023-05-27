@@ -22,12 +22,10 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import com.fatec.stacktec.persistenceapi.listener.user.UserInternalEntityListener;
+import com.fatec.stacktec.persistenceapi.enumeration.SemestreType;
 import com.fatec.stacktec.persistenceapi.model.post.Post;
 import com.fatec.stacktec.persistenceapi.model.post.Resposta;
 import com.fatec.stacktec.persistenceapi.model.util.IdentityGeneratorIdentifierEntity;
-import com.fatec.stacktec.searchapi.enumeration.SemestreType;
-import com.fatec.stacktec.searchapi.holder.UserInternalHolder;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -40,7 +38,6 @@ import lombok.ToString;
 @ToString(exclude = {"roles", "posts", "respostas"})
 @Entity
 @Table(name = "userInternal")
-@EntityListeners({UserInternalEntityListener.class})
 public class UserInternal extends IdentityGeneratorIdentifierEntity<Long> implements Serializable {
 	
 	@Column(nullable = false, columnDefinition = "boolean default true")
@@ -86,11 +83,5 @@ public class UserInternal extends IdentityGeneratorIdentifierEntity<Long> implem
 		this.email = email;
 		this.password = password;
 	}
-
-	@Override
-	public Optional<UserInternalHolder> populateForCache() {
-		return Optional.of(new UserInternalHolder(getId(), getName(), getEmail(), getApelido(), getSemestre()));
-	}
-	
 	
 }

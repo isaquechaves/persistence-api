@@ -1,17 +1,13 @@
 package com.fatec.stacktec.persistenceapi.model.post;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
@@ -32,7 +28,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tag")
-//@EntityListeners
 public class Tag extends IdentityGeneratorIdentifierEntity<Long> implements Serializable {
 	
 	@Column
@@ -53,8 +48,4 @@ public class Tag extends IdentityGeneratorIdentifierEntity<Long> implements Seri
 		this.nome = value.trim();
 	}
 	
-	@Override
-	public Optional populateForCache() {
-		return Optional.empty();
-	}
 }

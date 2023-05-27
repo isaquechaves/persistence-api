@@ -54,9 +54,5 @@ public abstract class BaseModel<ID> implements Serializable {
 	@LastModifiedDate
 	@ApiModelProperty(hidden = true)
 	protected Date UpdatedAt;
-			
-	
-	@Transient
-	public abstract Optional populateForCache();
 
 }

@@ -1,9 +1,6 @@
 package com.fatec.stacktec.persistenceapi.model.post;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
 @Data
@@ -30,7 +26,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "comentario")
-//@EntityListeners
 public class Comentario extends IdentityGeneratorIdentifierEntity<Long> implements Serializable {
 	
 	@NotNull
@@ -48,10 +43,5 @@ public class Comentario extends IdentityGeneratorIdentifierEntity<Long> implemen
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "resposta_id", foreignKey = @ForeignKey(name = "fk_comentario_resposta"))
 	private Resposta resposta;
-	
-	@Override
-	public Optional populateForCache() {		
-		return Optional.empty();
-	}
-	
+		
 }

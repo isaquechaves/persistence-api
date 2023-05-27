@@ -98,8 +98,4 @@ public class Post extends IdentityGeneratorIdentifierEntity<Long> implements Ser
 	@UpdateTimestamp
 	private Date atualizadoEm;
 
-	@Override
-	public Optional populateForCache() {
-		return Optional.empty();
-	}
 }

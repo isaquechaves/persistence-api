@@ -1,9 +1,8 @@
 package com.fatec.stacktec.persistenceapi.dto;
 
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fatec.stacktec.searchapi.enumeration.SemestreType;
+import com.fatec.stacktec.persistenceapi.enumeration.SemestreType;
 
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
