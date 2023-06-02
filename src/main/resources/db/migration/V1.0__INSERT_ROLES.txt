@@ -1,2 +1,24 @@
 INSERT INTO role VALUES('ROLE_ADMIN', 'role admin');
 INSERT INTO role VALUES('ROLE_ALUNO', 'role aluno"');
+
+
+INSERT INTO public.disciplina
+(updatedat, updatedby, createdat, createdby, "version", descricao, nome)
+VALUES(Now(), '', Now(), '', 0, 'POO orientação objetos', 'POO');
+
+
+INSERT INTO public.tag
+(updatedat, updatedby, createdat, createdby, "version", nome, qtdeposts)
+VALUES(Now() , '', Now(), '', 0, 'Java', 0);
+
+INSERT INTO public.tag
+(updatedat, updatedby, createdat, createdby, "version", nome, qtdeposts)
+VALUES(Now(), '', Now(), '', 0, 'POO', 0);
+
+INSERT INTO public.tag
+(updatedat, updatedby, createdat, createdby, "version", nome, qtdeposts)
+VALUES(Now(), '', Now(), '', 0, 'JS', 0);
+
+INSERT INTO public.tag
+(updatedat, updatedby, createdat, createdby, "version", nome, qtdeposts)
+VALUES(Now(), '', Now(), '', 0, 'MPCT', 0);

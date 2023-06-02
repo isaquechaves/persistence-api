@@ -1,17 +1,38 @@
 package com.fatec.stacktec.persistenceapi.service.post;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fatec.stacktec.persistenceapi.dto.post.PostComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.PostDto;
+import com.fatec.stacktec.persistenceapi.dto.post.PostMinimalDto;
+import com.fatec.stacktec.persistenceapi.dto.post.PostPageDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaDto;
 import com.fatec.stacktec.persistenceapi.model.post.Comentario;
 import com.fatec.stacktec.persistenceapi.model.post.Disciplina;
@@ -29,6 +50,9 @@ import lombok.extern.java.Log;
 @Service
 public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	
+	
+	@Autowired
+    private EntityManager entityManager;
 	
 	@Autowired
 	private DisciplinaService disciplinaService;
@@ -140,6 +164,7 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		return post;
 	}
 
+	@Transactional
 	public Set<Tag> findTagsByName(Set<String> nomes) {
 		Set<Tag> tagList = new HashSet<>();
 		
@@ -171,6 +196,53 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 
 	public Optional<Post> getById(Long id) {
 		return repository.getById(id);
+	}
+	
+	public PostPageDto findPostsByTags(ModelMapper modelMapper, List<String> tags, int page, int pageSize) {
+	    String jpql = "SELECT p FROM Post p JOIN p.tags t WHERE t.nome IN :tags " +
+	                  "GROUP BY p HAVING COUNT(DISTINCT t) = :tagCount";
+	    
+	    TypedQuery<Post> query = entityManager.createQuery(jpql, Post.class);
+	    query.setParameter("tags", tags);
+	    query.setParameter("tagCount", Long.valueOf(tags.size()));
+	    
+	    query.setFirstResult((page - 1) * pageSize);
+	    query.setMaxResults(pageSize);
+	    
+	    List<Post> posts = query.getResultList();
+	    List<PostMinimalDto> postsMinimalsDtos = modelMapper.map(posts, new TypeToken<List<PostMinimalDto>>() {}.getType());
+
+	    // Get the total count
+	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE t.nome IN :tags";
+	    TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
+	    countQuery.setParameter("tags", tags);
+	    Long total = countQuery.getSingleResult();
+	    Integer totalResults = Double.valueOf(Math.ceil(total / (double) pageSize)).intValue();
+	    Integer totalPages = total.intValue();
+	    return new PostPageDto(totalResults, totalPages, postsMinimalsDtos);
+	}
+
+	public PostPageDto findPostsByTagPaginated(ModelMapper modelMapper, String nome, int page, int pageSize) {
+	    String jpql = "SELECT p FROM Post p JOIN p.tags t WHERE t.nome = :nome";
+	    
+	    TypedQuery<Post> query = entityManager.createQuery(jpql, Post.class);
+	    query.setParameter("nome", nome);
+	    
+	    query.setFirstResult((page - 1) * pageSize);
+	    query.setMaxResults(pageSize);
+	    
+	    
+	    List<Post> posts = query.getResultList();
+	    List<PostMinimalDto> postsMinimalsDtos = modelMapper.map(posts, new TypeToken<List<PostMinimalDto>>() {}.getType());
+
+	    // Get the total count
+	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE t.nome = :nome";
+	    TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
+	    countQuery.setParameter("nome", nome);
+	    Long total = countQuery.getSingleResult();
+	    Integer totalResults = Double.valueOf(Math.ceil(total / (double) pageSize)).intValue();
+	    Integer totalPages = total.intValue();
+	    return new PostPageDto(totalResults, totalPages, postsMinimalsDtos);
 	}
 	
 }

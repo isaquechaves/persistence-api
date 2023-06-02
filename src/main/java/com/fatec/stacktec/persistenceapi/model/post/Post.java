@@ -41,7 +41,7 @@ import lombok.ToString;
 //@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = false, exclude = {"tags"})
+@EqualsAndHashCode(callSuper = false, exclude = "tags")
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "post")

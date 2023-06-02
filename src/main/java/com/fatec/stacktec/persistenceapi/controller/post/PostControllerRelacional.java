@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,8 +29,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fatec.stacktec.persistenceapi.controller.BaseController;
 import com.fatec.stacktec.persistenceapi.dto.post.PostComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.PostDto;
+import com.fatec.stacktec.persistenceapi.dto.post.PostMinimalDto;
+import com.fatec.stacktec.persistenceapi.dto.post.PostPageDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaDto;
 import com.fatec.stacktec.persistenceapi.dto.post.TagDto;
+import com.fatec.stacktec.persistenceapi.dto.post.request.ParamsToPaginate;
 import com.fatec.stacktec.persistenceapi.model.post.Comentario;
 import com.fatec.stacktec.persistenceapi.model.post.Disciplina;
 import com.fatec.stacktec.persistenceapi.model.post.Post;
@@ -91,6 +95,38 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		}		
 		return ResponseEntity.noContent().build();
 	}
+	
+	
+	@ApiOperation(value = "Get post pageable")
+	@PostMapping("/v1.1/getPageableByOneTag/{pageNumber}/{pageSize}/{tag}")
+	@Transactional
+	public ResponseEntity getPostPaginateByOneTag(@Valid @RequestBody ParamsToPaginate params,
+				@PathVariable Integer pageNumber, @PathVariable  Integer pageSize,
+				@PathVariable String tag) {
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		
+		PostPageDto paginatedPosts = service.findPostsByTagPaginated(modelMapper, tag, pageNumber, pageSize);
+				
+		return ResponseEntity.ok(paginatedPosts);
+	}
+	
+	@ApiOperation(value = "Get post pageable")
+	@PostMapping("/v1.1/getPageableByTags/{pageNumber}/{pageSize}")
+	@Transactional
+	public ResponseEntity getPostPaginatedByTags(@Valid @RequestBody ParamsToPaginate params, @PathVariable Integer pageNumber, @PathVariable  Integer pageSize) {
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		Set<String> tagsSet = new HashSet<>(params.getTags());
+		List<String> arr = new ArrayList<>(tagsSet);
+		PostPageDto paginatedPosts = service.findPostsByTags(modelMapper, arr, pageNumber, pageSize);
+		
+				
+		return ResponseEntity.ok(paginatedPosts);
+	}
+		
 	
 	@ApiOperation(value = "Upload post")
 	@PostMapping("/v1.1/create")
