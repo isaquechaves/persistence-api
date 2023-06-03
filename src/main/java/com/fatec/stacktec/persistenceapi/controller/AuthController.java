@@ -99,7 +99,7 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	    	        .map(item -> item.getName())
 	    	        .collect(Collectors.toList());
 	        
-	        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, token).body(new UserInfoResponse(userInternal.getEmail(), roles)); 
+	        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, token).body(new UserInfoResponse(userInternal.getName(), userInternal.getEmail(), roles, userInternal.getId(), (String)valueWrapper.get())); 
 	    }
 	    	        	
     	Authentication authentication = authenticationManager
@@ -123,9 +123,9 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	    
 	    //Store JWT in Cache
 	    cache.put(cacheKey, jwtCookie.getValue());
-
+	    UserInternal userEntity = service.findByEmail(name);
 	    return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-	        .body(new UserInfoResponse(auth.getName(), roles)); 
+	        .body(new UserInfoResponse(userEntity.getName(), auth.getName(), roles, userEntity.getId(), jwtCookie.toString())); 
 	    
 	    	    	      
     }
@@ -141,10 +141,30 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	    UserInternal user = convertToModelCreate(signUpRequest, null);
 	    
 	    UserInternal created = userService.createElementAndFlush(user);
+	    
 	    if(created != null) {
-	    	ObjectNode response = objectMapper.createObjectNode();
-	    	response.put("id", created.getId());
-	    	return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		    Authentication authentication = authenticationManager
+	    	        .authenticate(new UsernamePasswordAuthenticationToken(signUp.getEmail(), signUp.getPassword()));
+		    
+		    SecurityContextHolder.getContext().setAuthentication(authentication);	   
+		    
+		    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		    String name = auth.getName();
+		    
+		 
+		    ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(name);
+	
+		    List<String> roles = auth.getAuthorities().stream()
+		        .map(item -> item.getAuthority())
+		        .collect(Collectors.toList());
+		    
+			Cache cache = cacheManager.getCache("usersCache");
+		    String cacheKey = signUp.getEmail();
+		    //Store JWT in Cache
+		    cache.put(cacheKey, jwtCookie.getValue());
+		    UserInternal userEntity = service.findByEmail(name);
+		    return ResponseEntity.status(HttpStatus.CREATED).header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+		        .body(new UserInfoResponse(signUp.getName(), auth.getName(), roles, userEntity.getId(), jwtCookie.toString())); 	    	    
 	    }else {
 	    	return ResponseEntity.noContent().build();
 	    }
@@ -182,7 +202,7 @@ public class AuthController extends BaseController<UserInternalService, UserInte
         user.setApelido(dto.getApelido());
 		
 		Set<Role> rolesUser = new HashSet<>();
-		rolesUser.add(roleRepository.findByName("ROLE_USER"));
+		rolesUser.add(roleRepository.findByName("ROLE_ALUNO"));
 		user.setRoles(rolesUser);
 			
 		user.setRoles(rolesUser);
