@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,7 +39,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fatec.stacktec.persistenceapi.dto.LoginDto;
 import com.fatec.stacktec.persistenceapi.dto.UserInternalDto;
 import com.fatec.stacktec.persistenceapi.dto.UserInternalDtoMinimal;
+import com.fatec.stacktec.persistenceapi.dto.UserInternalPageDto;
 import com.fatec.stacktec.persistenceapi.dto.UserInternalToListDto;
+import com.fatec.stacktec.persistenceapi.dto.post.request.ParamsToPaginate;
 import com.fatec.stacktec.persistenceapi.exception.BusinessException;
 import com.fatec.stacktec.persistenceapi.model.user.Role;
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
@@ -195,6 +198,20 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	    }
     	return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    
+    @GetMapping("/v1.1/{pageNumber}/{pageSize}/{email}")
+  	@Transactional
+  	@Validated
+  	public ResponseEntity getUsersPaginated(@PathVariable Integer pageNumber, @PathVariable  Integer pageSize, @PathVariable String email) {
+      	
+    	if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+    	
+      	UserInternalPageDto paginatedUsers = service.findUsersByEmailPaginated(modelMapper, pageNumber, pageSize, email);
+      	
+      	return ResponseEntity.ok(paginatedUsers);
+  }
     
 	private UserInternal convertToModelCreate(UserInternalDtoMinimal dto, UserInternal base) {
 		UserInternal user = new UserInternal(dto.getEmail(), passwordEncoder.encode(dto.getPassword()));

@@ -98,10 +98,9 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 	
 	
 	@ApiOperation(value = "Get post pageable")
-	@PostMapping("/v1.1/getPageableByOneTag/{pageNumber}/{pageSize}/{tag}")
+	@GetMapping("/v1.1/getPageableByOneTag/{pageNumber}/{pageSize}/{tag}")
 	@Transactional
-	public ResponseEntity getPostPaginateByOneTag(@Valid @RequestBody ParamsToPaginate params,
-				@PathVariable Integer pageNumber, @PathVariable  Integer pageSize,
+	public ResponseEntity getPostPaginateByOneTag(@PathVariable Integer pageNumber, @PathVariable  Integer pageSize,
 				@PathVariable String tag) {
 		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
