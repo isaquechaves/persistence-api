@@ -72,7 +72,7 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	@Transactional
 	public Post updatePost(ModelMapper modelMapper, PostDto dto) {
 		Post post = modelMapper.map(dto, Post.class);		
-		Set<Resposta> respostasPost = new HashSet<>(0);
+		List<Resposta> respostasPost = new ArrayList<>();
 		Set<Tag> tagsPost = new HashSet<>(0);
 		Set<Comentario> comentariosPost = new HashSet<>(0);		
 		
@@ -101,11 +101,11 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		}
 						
 		
-		Set<RespostaDto> respostaDtoList = dto.getRespostas();
+		List<RespostaDto> respostaDtoList = dto.getRespostas();
 		dto.setRespostas(null);
 		
 		if(respostaDtoList != null) {
-			Set<Resposta> respostaList = new HashSet<>(0);
+			List<Resposta> respostaList = new ArrayList<>();
 			for(RespostaDto respostaDto : respostaDtoList) {
 				Resposta resposta = respostaService.findById(respostaDto.getId());
 				if(resposta != null) {
@@ -122,7 +122,7 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 			if(respostasPost != null) {
 				respostasPost.clear();
 			}else {
-				respostasPost = new HashSet<>(0);
+				respostasPost = new ArrayList<>(0);
 			}
 		}
 		post.setRespostas(respostasPost);

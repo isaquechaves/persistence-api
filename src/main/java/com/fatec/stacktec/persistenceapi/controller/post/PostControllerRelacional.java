@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -89,7 +90,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
-		Post element = (Post) service.findById(elementId);
+		Post element = (Post) service.getOne(elementId);
 		if(element != null) {
 			return ResponseEntity.ok(convertToDetailDto(element));
 		}		
@@ -180,6 +181,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 	protected Object convertToDetailDto(Post post) {
 		Disciplina disciplina = null;
 		UserInternal autor = null;
+		List<Resposta> respostas = null;
 		
 		if(post.getDisciplina() != null) {
 			disciplina = post.getDisciplina();
@@ -188,7 +190,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		if(post.getAutor() != null) {
 			autor = post.getAutor();
 			post.setAutor(null);
-		}
+		}		
 		
 		if(post.getTags() != null) {
 			Set<Tag> listTags = new HashSet<>();
@@ -197,7 +199,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 			}
 			post.setTags(listTags);
 		}
-		
+
 		PostDto postDto = modelMapper.map(post, PostDto.class);
 		
 		if(post.getTags() != null) {
@@ -206,6 +208,10 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 				listTagsDto.add(tag.getNome());
 			}
 			postDto.setTags(listTagsDto);
+		}
+		
+		if(post.getRespostas() != null) {			
+			postDto.setRespostas(modelMapper.map(postDto.getRespostas(), new TypeToken<List<RespostaDto>>() {}.getType()));					
 		}
 		
 		if(disciplina != null) {
@@ -224,7 +230,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 	protected Post convertToModel(PostDto dto) {		
 				    
 		Post post = modelMapper.map(dto, Post.class);		
-		Set<Resposta> respostasPost = new HashSet<>(0);
+		List<Resposta> respostasPost = new ArrayList<>();
 		Set<Tag> tagsPost = new HashSet<>(0);
 		Set<Comentario> comentariosPost = new HashSet<>(0);
 		
@@ -259,11 +265,11 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		tagsPost = postService.findTagsByName(dto.getTags()); 				
 		post.setTags(tagsPost);
 		
-		Set<RespostaDto> respostaDtoList = dto.getRespostas();
+		List<RespostaDto> respostaDtoList = dto.getRespostas();
 		dto.setRespostas(null);
 		
 		if(respostaDtoList != null) {
-			Set<Resposta> respostaList = new HashSet<>(0);
+			List<Resposta> respostaList = new ArrayList<>();
 			for(RespostaDto respostaDto : respostaDtoList) {
 				Resposta resposta = respostaService.findById(respostaDto.getId());
 				if(resposta != null) {
@@ -280,7 +286,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 			if(respostasPost != null) {
 				respostasPost.clear();
 			}else {
-				respostasPost = new HashSet<>(0);
+				respostasPost = new ArrayList<>();
 			}
 		}
 		post.setRespostas(respostasPost);

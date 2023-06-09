@@ -1,6 +1,7 @@
 package com.fatec.stacktec.persistenceapi.dto.post;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,8 +36,8 @@ public class PostDto {
 	@JsonProperty 
 	private Set<String> tags;
 	
-	@JsonIgnore
-	private Set<RespostaDto> respostas;	
+	@JsonProperty
+	private List<RespostaDto> respostas;	
 	
 	@JsonProperty 
 	private Long disciplinaId;

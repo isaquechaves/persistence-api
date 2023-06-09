@@ -1,8 +1,10 @@
 package com.fatec.stacktec.persistenceapi.model.post;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,7 +43,7 @@ import lombok.ToString;
 //@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = false, exclude = "tags")
+//@EqualsAndHashCode(callSuper = false, exclude = "tags")
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "post")
@@ -68,7 +70,7 @@ public class Post extends IdentityGeneratorIdentifierEntity<Long> implements Ser
 	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
 			fetch = FetchType.LAZY, mappedBy = "post",
 			orphanRemoval = true)
-	private Set<Resposta> respostas = new HashSet<>(0);
+	private List<Resposta> respostas = new ArrayList<>();
 	
 	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
 			fetch = FetchType.LAZY, mappedBy = "post",
