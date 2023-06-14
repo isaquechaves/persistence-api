@@ -5,6 +5,7 @@ import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -33,6 +34,12 @@ public class PersistenceApiApplication {
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 	    return new PropertySourcesPlaceholderConfigurer();
+	}
+	
+	@Bean
+	public static ModelMapper ModelMapper() {
+		ModelMapper modelMapper = new ModelMapper();
+		return modelMapper;
 	}
 	
    @PostConstruct
