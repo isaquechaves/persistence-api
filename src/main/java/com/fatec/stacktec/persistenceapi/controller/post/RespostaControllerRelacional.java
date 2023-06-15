@@ -32,6 +32,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fatec.stacktec.persistenceapi.controller.BaseController;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaDto;
+import com.fatec.stacktec.persistenceapi.enumeration.BusinessExceptionCode;
+import com.fatec.stacktec.persistenceapi.enumeration.PostStatus;
+import com.fatec.stacktec.persistenceapi.exception.BusinessException;
 import com.fatec.stacktec.persistenceapi.model.post.Comentario;
 import com.fatec.stacktec.persistenceapi.model.post.Post;
 import com.fatec.stacktec.persistenceapi.model.post.Resposta;
@@ -100,6 +103,11 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
+		Post post = postService.getOne(respostaDto.getPostId());		
+		if(post.getPostStatus().getStatus().equals(PostStatus.FECHADO.getStatus())) {
+			throw new BusinessException(BusinessExceptionCode.POST_FECHADO, "Este post está fechado e não aceita respostas no momento");
+		}
+		
 		Resposta converted = convertToModel(respostaDto);
 		Resposta elementCreated = (Resposta) respostaService.createElement(converted);
 		if(elementCreated != null) {						
@@ -124,11 +132,43 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 		if(elementUpdated != null) {						
 			ObjectNode response = objectMapper.createObjectNode();								
 			response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
-			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+			return ResponseEntity.status(HttpStatus.OK).body(response);
 		}
 		
 		return ResponseEntity.noContent().build();
 	}
+	
+	@ApiOperation(value = "Aceitar resposta")
+	@PutMapping("/v1.1/aceita/{id}")
+	@Transactional
+	public ResponseEntity aceitaResposta(@PathVariable(value = "id") Long respostaId) {
+				
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		Resposta resposta = respostaService.getOne(respostaId);
+		Post post = postService.getOne(resposta.getPost().getId());		
+		UserInternal autorPost = userService.getOne(post.getAutor().getId());
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		 String name = auth.getName();
+		if(autorPost.getEmail().equals(name)) {
+			resposta.setAceita(true);
+			Resposta elementUpdated = (Resposta) respostaService.updateElement(respostaId, resposta);
+			post.setPostStatus(PostStatus.RESPONDIDO);
+			postService.updateElement(post.getId(), post);
+			if(elementUpdated != null) {						
+				ObjectNode response = objectMapper.createObjectNode();								
+				response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
+				return ResponseEntity.status(HttpStatus.OK).body(response);
+			}
+		}else {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		
+		return ResponseEntity.noContent().build();
+	}
+		
 		
 
 

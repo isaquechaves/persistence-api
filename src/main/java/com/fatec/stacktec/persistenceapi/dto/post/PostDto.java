@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fatec.stacktec.persistenceapi.enumeration.PostStatus;
 
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -48,4 +49,6 @@ public class PostDto {
 	@JsonProperty 
 	private Date atualizadoEm;
 	
+	@JsonProperty
+	private PostStatus postStatus;
 }

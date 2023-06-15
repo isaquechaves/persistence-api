@@ -12,6 +12,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
@@ -29,6 +30,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
+import com.fatec.stacktec.persistenceapi.enumeration.PostStatus;
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
 import com.fatec.stacktec.persistenceapi.model.util.IdentityGeneratorIdentifierEntity;
 
@@ -99,5 +101,9 @@ public class Post extends IdentityGeneratorIdentifierEntity<Long> implements Ser
 	@Column
 	@UpdateTimestamp
 	private Date atualizadoEm;
+	
+	@Column
+	@Enumerated
+	private PostStatus postStatus;
 
 }

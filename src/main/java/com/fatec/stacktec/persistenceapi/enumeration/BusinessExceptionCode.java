@@ -6,10 +6,10 @@ import lombok.Getter;
 public enum BusinessExceptionCode {
 	
 	UNKNOWN(1),
-	
 	EMAIL_INVALID(9000),
 	USER_LOGGED_DIFFERENT_EMAIL(9001),
-	USER_VALIDATION_ERROR(9002);
+	USER_VALIDATION_ERROR(9002),
+	POST_FECHADO(9003);
 	
 	private Integer code;
 	

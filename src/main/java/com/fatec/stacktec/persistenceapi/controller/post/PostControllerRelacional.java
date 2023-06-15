@@ -36,6 +36,7 @@ import com.fatec.stacktec.persistenceapi.dto.post.RespostaComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaDto;
 import com.fatec.stacktec.persistenceapi.dto.post.TagDto;
 import com.fatec.stacktec.persistenceapi.dto.post.request.ParamsToPaginate;
+import com.fatec.stacktec.persistenceapi.enumeration.PostStatus;
 import com.fatec.stacktec.persistenceapi.model.post.Comentario;
 import com.fatec.stacktec.persistenceapi.model.post.Disciplina;
 import com.fatec.stacktec.persistenceapi.model.post.Post;
@@ -137,6 +138,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
+		postDto.setPostStatus(PostStatus.ABERTO);
 		Post converted = convertToModel(postDto);
 		Post elementCreated = (Post) postService.createElement(converted);
 		if(elementCreated != null) {						
