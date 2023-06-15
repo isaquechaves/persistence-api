@@ -30,8 +30,8 @@ public class PostDto {
 	@JsonProperty 
 	private String descricao;	
 	
-	@JsonIgnore
-	private Set<PostComentarioDto> comentarios;
+	@JsonProperty
+	private List<PostComentarioDto> comentarios;
 	
 	@JsonProperty 
 	private Set<String> tags;

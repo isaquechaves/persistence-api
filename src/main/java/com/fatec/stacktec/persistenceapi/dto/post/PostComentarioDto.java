@@ -21,7 +21,10 @@ public class PostComentarioDto {
 	private Long postId;
 	
 	@JsonProperty
-	private Long autor;
+	private Long autorId;
+	
+	@JsonProperty
+	private String autorApelido;
 	
 	@JsonProperty
 	private String texto;

@@ -15,16 +15,19 @@ import lombok.NoArgsConstructor;
 @ApiModel(value = "RespostaComentarioDetail", description = "Sample model for comentario resposta detail")
 public class RespostaComentarioDto {
 
-		@JsonProperty
-		private Long id;
-		
-		@JsonIgnore
-		private Long respostaId;
-		
-		@JsonProperty
-		private Long autor;
-		
-		@JsonProperty
-		private String texto;
-			 
-	}
+	@JsonProperty
+	private Long id;
+	
+	@JsonIgnore
+	private Long respostaId;
+	
+	@JsonProperty
+	private Long autor;
+	
+	@JsonProperty
+	private String autorApelido;
+	
+	@JsonProperty
+	private String texto;
+		 
+}

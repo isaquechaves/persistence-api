@@ -1,6 +1,8 @@
 package com.fatec.stacktec.persistenceapi.service.post;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -11,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fatec.stacktec.persistenceapi.dto.post.PostComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaDto;
 import com.fatec.stacktec.persistenceapi.model.post.Comentario;
@@ -41,17 +42,17 @@ public class RespostaService extends CrudServiceJpaImpl<RespostaRepository, Resp
 	@Transactional
 	public Resposta updateResposta(ModelMapper modelMapper, @Valid RespostaDto respostaDto) {
 		Resposta resposta = modelMapper.map(respostaDto, Resposta.class);
-		Set<Comentario> comentariosResposta = new HashSet<>(0);
+		List<Comentario> comentariosResposta = new ArrayList<>();
 		
 		if(resposta.getComentarios() != null) {
 			comentariosResposta = resposta.getComentarios();
 		}
 		
-		Set<RespostaComentarioDto> comentarioDtoList = respostaDto.getComentarios();
+		List<RespostaComentarioDto> comentarioDtoList = respostaDto.getComentarios();
 		respostaDto.setComentarios(null);
 		
 		if(comentarioDtoList != null) {
-			Set<Comentario> comentarioList = new HashSet<>(0);
+			List<Comentario> comentarioList = new ArrayList<>();
 			for(RespostaComentarioDto comentarioDto : comentarioDtoList) {
 				Comentario comentario = comentarioService.findById(comentarioDto.getId());
 				if(comentario != null) {
@@ -68,7 +69,7 @@ public class RespostaService extends CrudServiceJpaImpl<RespostaRepository, Resp
 			if(comentariosResposta != null) {
 				comentariosResposta.clear();
 			}else {
-				comentariosResposta = new HashSet<>(0);
+				comentariosResposta = new ArrayList<>();
 			}
 		}		
 		resposta.setComentarios(comentariosResposta);

@@ -74,7 +74,7 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		Post post = modelMapper.map(dto, Post.class);		
 		List<Resposta> respostasPost = new ArrayList<>();
 		Set<Tag> tagsPost = new HashSet<>(0);
-		Set<Comentario> comentariosPost = new HashSet<>(0);		
+		List<Comentario> comentariosPost = new ArrayList<>();		
 		
 		if(post.getRespostas() != null) {
 			respostasPost = post.getRespostas();
@@ -128,11 +128,11 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		post.setRespostas(respostasPost);
 		
 		
-		Set<PostComentarioDto> comentarioDtoList = dto.getComentarios();
+		List<PostComentarioDto> comentarioDtoList = dto.getComentarios();
 		dto.setComentarios(null);
 		
 		if(comentarioDtoList != null) {
-			Set<Comentario> comentarioList = new HashSet<>(0);
+			List<Comentario> comentarioList = new ArrayList<>();
 			for(PostComentarioDto comentarioDto : comentarioDtoList) {
 				Comentario comentario = comentarioService.findById(comentarioDto.getId());
 				if(comentario != null) {
@@ -149,7 +149,7 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 			if(comentariosPost != null) {
 				comentariosPost.clear();
 			}else {
-				comentariosPost = new HashSet<>(0);
+				comentariosPost = new ArrayList<>();
 			}
 		}
 		post.setComentarios(comentariosPost);

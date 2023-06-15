@@ -32,6 +32,7 @@ import com.fatec.stacktec.persistenceapi.dto.post.PostComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.PostDto;
 import com.fatec.stacktec.persistenceapi.dto.post.PostMinimalDto;
 import com.fatec.stacktec.persistenceapi.dto.post.PostPageDto;
+import com.fatec.stacktec.persistenceapi.dto.post.RespostaComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaDto;
 import com.fatec.stacktec.persistenceapi.dto.post.TagDto;
 import com.fatec.stacktec.persistenceapi.dto.post.request.ParamsToPaginate;
@@ -181,7 +182,9 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 	protected Object convertToDetailDto(Post post) {
 		Disciplina disciplina = null;
 		UserInternal autor = null;
-		List<Resposta> respostas = null;
+		List<Resposta> respostas = new ArrayList<>();
+		List<Comentario> comentariosPost = new ArrayList<>();
+		List<Tag> tags = new ArrayList<>(); 
 		
 		if(post.getDisciplina() != null) {
 			disciplina = post.getDisciplina();
@@ -190,7 +193,17 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		if(post.getAutor() != null) {
 			autor = post.getAutor();
 			post.setAutor(null);
-		}		
+		}	
+		
+		if(post.getRespostas() != null) {
+			respostas = post.getRespostas();
+			post.setRespostas(null);
+		}	
+		
+		if(post.getComentarios() != null) {
+			comentariosPost = post.getComentarios();
+			post.setComentarios(null);
+		}	
 		
 		if(post.getTags() != null) {
 			Set<Tag> listTags = new HashSet<>();
@@ -199,10 +212,10 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 			}
 			post.setTags(listTags);
 		}
-
+		
 		PostDto postDto = modelMapper.map(post, PostDto.class);
 		
-		if(post.getTags() != null) {
+		if(respostas != null) {
 			Set<String> listTagsDto = new HashSet<>();
 			for(Tag tag: post.getTags()) {
 				listTagsDto.add(tag.getNome());
@@ -210,8 +223,16 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 			postDto.setTags(listTagsDto);
 		}
 		
-		if(post.getRespostas() != null) {			
-			postDto.setRespostas(modelMapper.map(postDto.getRespostas(), new TypeToken<List<RespostaDto>>() {}.getType()));					
+		if(respostas != null) {			
+			List<RespostaDto> respostasDto = new ArrayList<>();
+			RespostaControllerRelacional.convertToDetailDtoParaPost(respostas, modelMapper, respostasDto, userService, comentarioService);			
+			postDto.setRespostas(respostasDto);	
+		}
+		
+		if(comentariosPost != null) {		
+			List<PostComentarioDto> comentariosDtoPost =  ComentarioService.mapComentariosDtoParaPosts(
+					comentariosPost, modelMapper, userService);
+			postDto.setComentarios(comentariosDtoPost);		
 		}
 		
 		if(disciplina != null) {
@@ -232,7 +253,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		Post post = modelMapper.map(dto, Post.class);		
 		List<Resposta> respostasPost = new ArrayList<>();
 		Set<Tag> tagsPost = new HashSet<>(0);
-		Set<Comentario> comentariosPost = new HashSet<>(0);
+		List<Comentario> comentariosPost = new ArrayList<>();
 		
 		//Define o atual usuário logado como autor
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -292,11 +313,11 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		post.setRespostas(respostasPost);
 		
 		
-		Set<PostComentarioDto> comentarioDtoList = dto.getComentarios();
+		List<PostComentarioDto> comentarioDtoList = dto.getComentarios();
 		dto.setComentarios(null);
 		
 		if(comentarioDtoList != null) {
-			Set<Comentario> comentarioList = new HashSet<>(0);
+			List<Comentario> comentarioList = new ArrayList<>();
 			for(PostComentarioDto comentarioDto : comentarioDtoList) {
 				Comentario comentario = comentarioService.findById(comentarioDto.getId());
 				if(comentario != null) {
@@ -313,7 +334,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 			if(comentariosPost != null) {
 				comentariosPost.clear();
 			}else {
-				comentariosPost = new HashSet<>(0);
+				comentariosPost = new ArrayList<>();
 			}
 		}
 		post.setComentarios(comentariosPost);

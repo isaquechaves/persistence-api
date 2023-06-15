@@ -75,7 +75,7 @@ public class Post extends IdentityGeneratorIdentifierEntity<Long> implements Ser
 	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
 			fetch = FetchType.LAZY, mappedBy = "post",
 			orphanRemoval = true)
-	private Set<Comentario> comentarios = new HashSet<>(0);
+	private List<Comentario> comentarios = new ArrayList<>();
 	
 	@ManyToMany(
 			fetch = FetchType.EAGER,

@@ -1,8 +1,10 @@
 package com.fatec.stacktec.persistenceapi.model.post;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -27,13 +29,12 @@ import com.fatec.stacktec.persistenceapi.model.util.IdentityGeneratorIdentifierE
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = false)
+//@EqualsAndHashCode(callSuper = false)
 @ToString()
 @NoArgsConstructor
 @AllArgsConstructor
@@ -65,7 +66,7 @@ public class Resposta extends IdentityGeneratorIdentifierEntity<Long> implements
 	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
 			fetch = FetchType.LAZY, mappedBy = "resposta",
 			orphanRemoval = true)
-	private Set<Comentario> comentarios = new HashSet<>(0);
+	private List<Comentario> comentarios = new ArrayList<>();
 
 	@Column
 	@CreatedDate

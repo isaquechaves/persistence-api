@@ -1,5 +1,6 @@
 package com.fatec.stacktec.persistenceapi.controller.post;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,9 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -51,12 +55,16 @@ import lombok.extern.java.Log;
 @Validated
 public class RespostaControllerRelacional extends BaseController<RespostaService, Resposta, RespostaDto>{
 	
+	@Autowired
 	private final PostService postService;
 
+	@Autowired
 	private final RespostaService respostaService;
 	
+	@Autowired
 	private final ComentarioService comentarioService;
 		
+	@Autowired
 	private final UserInternalService userService;	
 	
 	
@@ -149,7 +157,7 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 		}			
 		
 		if(resposta.getComentarios() != null) {
-			Set<Comentario> listComentario = new HashSet<>(0);
+			List<Comentario> listComentario = new ArrayList<>();
 			for(Comentario comentario: resposta.getComentarios()) {
 				listComentario.add(comentario);
 			}
@@ -172,7 +180,7 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 	protected Resposta convertToModel(RespostaDto dto) {		
 				    
 		Resposta resposta = modelMapper.map(dto, Resposta.class);				
-		Set<Comentario> comentariosResposta = new HashSet<>(0);
+		List<Comentario> comentariosResposta = new ArrayList<>();
 		
 		//Define o atual usuário logado como autor
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -192,11 +200,11 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 			comentariosResposta = resposta.getComentarios();
 		}									
 		
-		Set<RespostaComentarioDto> comentarioDtoList = dto.getComentarios();
+		List<RespostaComentarioDto> comentarioDtoList = dto.getComentarios();
 		dto.setComentarios(null);
 		
 		if(comentarioDtoList != null) {
-			Set<Comentario> comentarioList = new HashSet<>(0);
+			List<Comentario> comentarioList = new ArrayList<>();
 			for(RespostaComentarioDto comentarioDto : comentarioDtoList) {
 				Comentario comentario = comentarioService.findById(comentarioDto.getId());
 				if(comentario != null) {
@@ -213,12 +221,58 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 			if(comentariosResposta != null) {
 				comentariosResposta.clear();
 			}else {
-				comentariosResposta = new HashSet<>(0);
+				comentariosResposta = new ArrayList<>();
 			}
 		}
 		resposta.setComentarios(comentariosResposta);
 		
 		return resposta;
+	}
+
+
+	public static void convertToDetailDtoParaPost(List<Resposta> respostas, ModelMapper modelMapper, List<RespostaDto> respostasDto, 
+				UserInternalService userService, ComentarioService comentarioService) {
+		
+		for(Resposta resposta: respostas) {
+			UserInternal autor = null;
+			Post post = null;
+			List<Comentario> comentariosResposta = new ArrayList<>();
+			
+			if(resposta.getAutor() != null) {
+				autor = resposta.getAutor();
+				resposta.setAutor(null);
+			}	
+			
+			if(resposta.getPost() != null) {
+				post = resposta.getPost();
+				resposta.setPost(null);
+			}			
+			
+			if(resposta.getComentarios() != null) {
+				for(Comentario comentario: resposta.getComentarios()) {
+					comentariosResposta.add(comentario);
+				}
+				resposta.setComentarios(null);
+			}
+			
+			RespostaDto respostaDto = modelMapper.map(resposta, RespostaDto.class);								
+			if(autor != null) {
+				respostaDto.setAutorId(autor.getId());
+			}	
+			
+			if(comentariosResposta != null) {
+				List<RespostaComentarioDto> comentariosDtoResposta =  ComentarioService.mapComentariosDtoParaRespostas(
+						comentariosResposta, modelMapper, userService);
+				
+				respostaDto.setComentarios(comentariosDtoResposta);
+			}
+			
+			if(post != null) {
+				respostaDto.setPostId(post.getId());
+			}
+			respostasDto.add(respostaDto);
+		}
+		
 	}	
 		
 

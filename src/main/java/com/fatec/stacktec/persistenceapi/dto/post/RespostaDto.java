@@ -1,7 +1,7 @@
 package com.fatec.stacktec.persistenceapi.dto.post;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,12 +35,12 @@ public class RespostaDto {
 	@JsonProperty
 	private Boolean aceita;
 
-	@JsonIgnore
-	private Set<RespostaComentarioDto> comentarios;
+	@JsonProperty
+	private List<RespostaComentarioDto> comentarios;
 	
-	@JsonIgnore
+	@JsonProperty
 	private Date criadoEm;
 	
-	@JsonIgnore
+	@JsonProperty
 	private Date atualizadoEm;
 }

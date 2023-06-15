@@ -17,10 +17,10 @@ public class ComentarioDto {
 	@JsonProperty
 	private Long id;
 	
-	@JsonIgnore
+	@JsonProperty
 	private Long postId;
 
-	@JsonIgnore
+	@JsonProperty
 	private Long respostaId;
 	
 	@JsonProperty

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -46,10 +47,13 @@ import lombok.extern.java.Log;
 @Validated
 public class ComentarioControllerRelacional extends BaseController<ComentarioService, Comentario, ComentarioDto>{
 	
+	@Autowired
 	private PostService postService;
 	
+	@Autowired
 	private RespostaService respostaService;
 	
+	@Autowired
 	private UserInternalService userService;
 	
 	@ApiOperation(value = "Get comentário by id")
@@ -173,15 +177,7 @@ public class ComentarioControllerRelacional extends BaseController<ComentarioSer
 			resposta = respostaService.getOne(dto.getRespostaId());
 			if(resposta != null)
 				comentario.setResposta(resposta);
-		}
-		
-		if(dto.getAutor() != null) {
-			Resposta resposta = null;
-			resposta = respostaService.getOne(dto.getRespostaId());
-			if(resposta != null)
-				comentario.setResposta(resposta);
-		}
-		
+		}			
 		
 		return comentario;
 	}
