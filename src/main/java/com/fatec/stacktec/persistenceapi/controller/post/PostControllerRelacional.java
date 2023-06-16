@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -150,6 +151,23 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		return ResponseEntity.noContent().build();
 	}
 	
+	@ApiOperation(value = "Delete post")
+	@Override
+	@DeleteMapping("/v1.0/{id}")
+	public ResponseEntity<?> deleteElement(Principal principal,
+										@PathVariable(value = "id") Long elementId) {
+		return deleteElement(elementId);
+	}
+	
+	private ResponseEntity<?> deleteElement(Long elementId) {
+		boolean success = service.deletePost(elementId);
+		if(success) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+		}		
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	}
+
+
 	@ApiOperation(value = "Update post")
 	@PutMapping("/v1.1/update/{id}")
 	@Transactional

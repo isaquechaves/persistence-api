@@ -245,4 +245,16 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	    return new PostPageDto(totalResults, totalPages, postsMinimalsDtos);
 	}
 	
+	@Transactional
+	public boolean deletePost(Long elementId) {
+		Post postToDelete = getOne(elementId);		
+		for(Tag tag : postToDelete.getTags()) {		
+			if(tag.getQtdePosts() > 0) {
+				tag.setQtdePosts(tag.getQtdePosts()-1);
+			}
+			tagService.updateElement(tag.getId(), tag);
+		}
+		boolean success = this.deleteElement(elementId);
+		return success;
+	}
 }

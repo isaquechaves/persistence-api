@@ -7,16 +7,49 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.TypeToken;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fatec.stacktec.persistenceapi.controller.BaseController;
 import com.fatec.stacktec.persistenceapi.dto.post.TagDto;
+import com.fatec.stacktec.persistenceapi.dto.tag.TagPageDto;
 import com.fatec.stacktec.persistenceapi.model.post.Post;
 import com.fatec.stacktec.persistenceapi.model.post.Tag;
 import com.fatec.stacktec.persistenceapi.service.post.TagService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@RestController
+@CrossOrigin
+@Api(value = "Tag", description = "tag api", tags = {"Tag"})
+@RequestMapping("/tag")
 public class TagControllerRelacional extends BaseController<TagService, Tag, TagDto>{
 
+	
+	@ApiOperation(value = "Get all tags paginated and order by qtdePost DESC")
+	@GetMapping("/v1.1/paginated-desc/{pageNumber}/{pageSize}")
+	@Transactional
+	public ResponseEntity<?> getAllTagsPaginatedSortDesc(@PathVariable Integer pageNumber, @PathVariable  Integer pageSize){
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		
+		TagPageDto paginatedTags = service.findTagsPaginated(modelMapper, pageNumber, pageSize);
+		if(paginatedTags != null && !ObjectUtils.isEmpty(paginatedTags)) {
+			return ResponseEntity.ok(paginatedTags);
+		}
+		
+		return ResponseEntity.noContent().build();
+	}
 	
 	@Override
 	protected List<?> convertToListDto(List<Tag> tagList) {
