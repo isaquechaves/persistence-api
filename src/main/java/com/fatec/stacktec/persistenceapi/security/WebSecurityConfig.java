@@ -42,7 +42,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
             "/configuration/security",
             "/swagger-ui.html",
             "/webjars/**",
-            "/auth/**"
+            "/auth/**",
+            "/api/post/v1.1/getFirstTenPosts",
+            "/api/tag/v1.1/paginated-desc/{pageNumber}/{pageSize}"
 	};
 	@Bean
 	public AuthTokenFilter authenticationJwtTokenFilter() {

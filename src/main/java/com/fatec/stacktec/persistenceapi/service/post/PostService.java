@@ -261,4 +261,8 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		boolean success = this.deleteElement(elementId);
 		return success;
 	}
+
+	public List<PostMinimalDto> getFirstTenPosts(ModelMapper modelMapper) {
+		return  modelMapper.map(repository.findTop10ByOrderByCreatedAtDesc(), new TypeToken<List<PostMinimalDto>>() {}.getType());
+	}
 }

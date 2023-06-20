@@ -1,5 +1,6 @@
 package com.fatec.stacktec.persistenceapi.repository.post;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,7 @@ import com.fatec.stacktec.persistenceapi.model.post.Post;
 public interface PostRepository extends JpaRepository<Post, Long>{
 
 	Optional<Post> getById(@Param("id") Long id);
+
+	List<Post> findTop10ByOrderByCreatedAtDesc();
 
 }

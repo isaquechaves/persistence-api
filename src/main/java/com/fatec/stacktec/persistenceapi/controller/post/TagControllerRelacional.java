@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +34,8 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @CrossOrigin
 @Api(value = "Tag", description = "tag api", tags = {"Tag"})
-@RequestMapping("/tag")
+@RequestMapping("/api/tag")
+@Validated
 public class TagControllerRelacional extends BaseController<TagService, Tag, TagDto>{
 
 	

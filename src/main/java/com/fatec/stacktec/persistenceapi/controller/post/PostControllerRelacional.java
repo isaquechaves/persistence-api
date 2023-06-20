@@ -116,6 +116,19 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 	}
 	
 	@ApiOperation(value = "Get post pageable")
+	@GetMapping("/v1.1/getFirstTenPosts")
+	@Transactional
+	public ResponseEntity getFirstTenPosts() {
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		
+		List<PostMinimalDto> postMinimals = service.getFirstTenPosts(modelMapper);
+			
+		return ResponseEntity.ok(postMinimals);
+	}
+	
+	@ApiOperation(value = "Get post pageable")
 	@PostMapping("/v1.1/getPageableByTags/{pageNumber}/{pageSize}")
 	@Transactional
 	public ResponseEntity getPostPaginatedByTags(@Valid @RequestBody ParamsToPaginate params, @PathVariable Integer pageNumber, @PathVariable  Integer pageSize) {
