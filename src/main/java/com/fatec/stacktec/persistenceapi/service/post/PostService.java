@@ -199,11 +199,15 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	}
 	
 	public PostPageDto findPostsByTags(ModelMapper modelMapper, List<String> tags, int page, int pageSize) {
-	    String jpql = "SELECT p FROM Post p JOIN p.tags t WHERE t.nome IN :tags " +
+	    String jpql = "SELECT p FROM Post p JOIN p.tags t WHERE LOWER(t.nome) IN :tags " +
 	                  "GROUP BY p HAVING COUNT(DISTINCT t) = :tagCount";
 	    
+	    List<String> lowercaseTags = tags.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+	    
 	    TypedQuery<Post> query = entityManager.createQuery(jpql, Post.class);
-	    query.setParameter("tags", tags);
+	    query.setParameter("tags", lowercaseTags);
 	    query.setParameter("tagCount", Long.valueOf(tags.size()));
 	    
 	    query.setFirstResult((page - 1) * pageSize);
@@ -213,9 +217,9 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	    List<PostMinimalDto> postsMinimalsDtos = modelMapper.map(posts, new TypeToken<List<PostMinimalDto>>() {}.getType());
 
 	    // Get the total count
-	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE t.nome IN :tags";
+	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE LOWER(t.nome) IN :tags";
 	    TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
-	    countQuery.setParameter("tags", tags);
+	    countQuery.setParameter("tags", lowercaseTags);
 	    Long total = countQuery.getSingleResult();
 	    Integer totalResults = Double.valueOf(Math.ceil(total / (double) pageSize)).intValue();
 	    Integer totalPages = total.intValue();
@@ -223,7 +227,7 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	}
 
 	public PostPageDto findPostsByTagPaginated(ModelMapper modelMapper, String nome, int page, int pageSize) {
-	    String jpql = "SELECT p FROM Post p JOIN p.tags t WHERE t.nome = :nome";
+	    String jpql = "SELECT p FROM Post p JOIN p.tags t WHERE LOWER(t.nome) = LOWER(:nome)";
 	    
 	    TypedQuery<Post> query = entityManager.createQuery(jpql, Post.class);
 	    query.setParameter("nome", nome);
@@ -236,7 +240,7 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	    List<PostMinimalDto> postsMinimalsDtos = modelMapper.map(posts, new TypeToken<List<PostMinimalDto>>() {}.getType());
 
 	    // Get the total count
-	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE t.nome = :nome";
+	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE LOWER(t.nome) = LOWER(:nome)";
 	    TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
 	    countQuery.setParameter("nome", nome);
 	    Long total = countQuery.getSingleResult();

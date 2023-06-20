@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpSession;
+
 import org.modelmapper.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +49,21 @@ public class TagControllerRelacional extends BaseController<TagService, Tag, Tag
 		if(paginatedTags != null && !ObjectUtils.isEmpty(paginatedTags)) {
 			return ResponseEntity.ok(paginatedTags);
 		}
+		
+		return ResponseEntity.noContent().build();
+	}
+	
+	@ApiOperation(value = "Get tag by name")
+	@GetMapping("/v1.1/name/{name}")
+	@Transactional
+	public ResponseEntity<?> getTagByName(@PathVariable String name, HttpSession session){
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		List<TagDto> tagDtos = service.findTagByName(modelMapper, name);
+	    if (tagDtos != null && !ObjectUtils.isEmpty(tagDtos)) {
+			return ResponseEntity.ok(tagDtos);
+	    }
 		
 		return ResponseEntity.noContent().build();
 	}

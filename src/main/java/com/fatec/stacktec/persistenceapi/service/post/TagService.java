@@ -1,7 +1,9 @@
 package com.fatec.stacktec.persistenceapi.service.post;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -26,6 +28,7 @@ public class TagService extends CrudServiceJpaImpl<TagRepository, Tag>{
 	@Autowired
 	private EntityManager entityManager;
 	
+	
 	public Optional<Tag> getByNome(String nome) {
 		return repository.getByNome(nome);
 	}
@@ -47,6 +50,18 @@ public class TagService extends CrudServiceJpaImpl<TagRepository, Tag>{
 	    Integer totalResults = Double.valueOf(Math.ceil(total / (double) pageSize)).intValue();
 	    Integer totalPages = total.intValue();
 	    return new TagPageDto(totalPages, totalResults, tagDtos);
+	}
+	
+	public List<TagDto> findTagByName(ModelMapper modelMapper, String name) {
+		String jpql = "SELECT t from Tag t WHERE LOWER(t.nome) LIKE LOWER(:name) ORDER BY t.nome ASC";
+		
+		TypedQuery<Tag> query = entityManager.createQuery(jpql, Tag.class);
+		query.setParameter("name", "%" + name + "%");
+		
+		List<Tag> tags = query.getResultList();
+		List<TagDto> tagDtos = modelMapper.map(tags, new TypeToken<List<TagDto>>() {}.getType());
+
+	    return tagDtos;
 	}
 
 }

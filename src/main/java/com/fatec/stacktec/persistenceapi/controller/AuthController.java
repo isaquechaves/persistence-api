@@ -55,11 +55,13 @@ import com.fatec.stacktec.persistenceapi.service.user.UserInternalService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.java.Log;
 
 @RestController
 @CrossOrigin
 @Api(value = "Auth", description = "auth api", tags = {"Auth"})
 @RequestMapping("/auth")
+@Log
 public class AuthController extends BaseController<UserInternalService, UserInternal, UserInternalDto>{
 
     @Autowired
@@ -94,8 +96,14 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	    String cacheKey = loginDto.getEmail();
 	    ValueWrapper valueWrapper = cache.get(cacheKey);	    	    
 	    if (valueWrapper != null) {
+	    	// Find the index of '=' and ';'
+	    	String inputToken = (String) valueWrapper.get();
+	    	int startIndex = inputToken.indexOf('=') + 1;
+	    	int endIndex = inputToken.indexOf(';');
+	    	// Extract the token
+	    	String jwtTokenSplit = inputToken.substring(startIndex, endIndex);
 	        // User is already authenticated, return the cached token
-		    String username = jwtUtils.getUserNameFromJwtToken((String)valueWrapper.get());
+		    String username = jwtUtils.getUserNameFromJwtToken(jwtTokenSplit);
 		    UserInternal userInternal = userService.findByEmail(username);	 
 	        String token = (String) valueWrapper.get();
 	        List<String> roles = userInternal.getRoles().stream()
@@ -125,7 +133,7 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	        .collect(Collectors.toList());
 	    
 	    //Store JWT in Cache
-	    cache.put(cacheKey, jwtCookie.getValue());
+	    cache.put(cacheKey, jwtCookie.toString());
 	    UserInternal userEntity = service.findByEmail(name);
 	    return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
 	        .body(new UserInfoResponse(userEntity.getName(), auth.getName(), roles, userEntity.getId(), jwtCookie.toString())); 
