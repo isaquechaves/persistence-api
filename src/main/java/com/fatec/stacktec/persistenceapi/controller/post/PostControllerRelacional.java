@@ -142,6 +142,19 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 				
 		return ResponseEntity.ok(paginatedPosts);
 	}
+	
+	@ApiOperation(value = "Get post pageable")
+	@PostMapping("/v1.1/getPageable/{pageNumber}/{pageSize}/{order}")
+	@Transactional
+	public ResponseEntity getPostPaginatedByTags(@PathVariable String order, @PathVariable Integer pageNumber, @PathVariable  Integer pageSize) {
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		
+		PostPageDto paginatedPosts = service.findPostsPageable(modelMapper, order, pageNumber, pageSize);
+						
+		return ResponseEntity.ok(paginatedPosts);
+	}
 		
 	
 	@ApiOperation(value = "Upload post")

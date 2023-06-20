@@ -265,4 +265,29 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	public List<PostMinimalDto> getFirstTenPosts(ModelMapper modelMapper) {
 		return  modelMapper.map(repository.findTop10ByOrderByCreatedAtDesc(), new TypeToken<List<PostMinimalDto>>() {}.getType());
 	}
+
+	public PostPageDto findPostsPageable(ModelMapper modelMapper, String order, Integer pageNumber, Integer pageSize) {
+		String jpql = null;
+		if(order.equals("recentes")) {
+			jpql = "SELECT p FROM Post p  ORDER BY p.criadoEm DESC";
+		}else if(order.equals("antigos")) {
+			jpql = "SELECT p from Post p ORDER by p.criadoEm ASC";
+		}
+	   
+		TypedQuery<Post> query = entityManager.createQuery(jpql, Post.class);
+	   
+		query.setFirstResult((pageNumber - 1) * pageSize);
+		query.setMaxResults(pageSize);
+	   
+		List<Post> posts = query.getResultList();
+		List<PostMinimalDto> postsMinimalsDtos = modelMapper.map(posts, new TypeToken<List<PostMinimalDto>>() {}.getType());
+	
+		// Get the total count
+		String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p";
+		TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
+		Long total = countQuery.getSingleResult();
+		Integer totalResults = Double.valueOf(Math.ceil(total / (double) pageSize)).intValue();
+		Integer totalPages = total.intValue();
+		return new PostPageDto(totalResults, totalPages, postsMinimalsDtos);
+	}
 }
