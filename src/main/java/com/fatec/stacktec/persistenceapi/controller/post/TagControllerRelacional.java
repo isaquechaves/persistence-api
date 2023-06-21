@@ -42,6 +42,7 @@ public class TagControllerRelacional extends BaseController<TagService, Tag, Tag
 	@ApiOperation(value = "Get all tags paginated and order by qtdePost DESC")
 	@GetMapping("/v1.1/paginated-desc/{pageNumber}/{pageSize}")
 	@Transactional
+	@CrossOrigin
 	public ResponseEntity<?> getAllTagsPaginatedSortDesc(@PathVariable Integer pageNumber, @PathVariable  Integer pageSize){
 		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -58,6 +59,7 @@ public class TagControllerRelacional extends BaseController<TagService, Tag, Tag
 	@ApiOperation(value = "Get tag by name")
 	@GetMapping("/v1.1/name/{name}")
 	@Transactional
+	@CrossOrigin
 	public ResponseEntity<?> getTagByName(@PathVariable String name, HttpSession session){
 		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
