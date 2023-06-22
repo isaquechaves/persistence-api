@@ -39,6 +39,7 @@ import com.fatec.stacktec.persistenceapi.model.post.Disciplina;
 import com.fatec.stacktec.persistenceapi.model.post.Post;
 import com.fatec.stacktec.persistenceapi.model.post.Resposta;
 import com.fatec.stacktec.persistenceapi.model.post.Tag;
+import com.fatec.stacktec.persistenceapi.model.post.Voto;
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
 import com.fatec.stacktec.persistenceapi.repository.post.PostRepository;
 import com.fatec.stacktec.persistenceapi.service.CrudServiceJpaImpl;
@@ -220,14 +221,18 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		for(Post post : posts) {
 			List<String> tagsDto = post.getTags().stream().map(Tag::getNome).collect(Collectors.toList());
 			post.setTags(null);
-			Integer votos = votoService.countVotesByPost(post.getId());
-			post.setVotos(null);
+			List<Voto> votos = post.getVotos();  // Get the votos collection
+		    post.setVotos(null); 
+			Integer votosCount = 0;
+			 if (votos != null && !votos.isEmpty())
+			        votosCount = votos.size();
 			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
-			dto.setVotos(votos);
-			dto.setTags(tagsDto);
+			dto.setVotos(votosCount);
+			dto.setTags(tags);
 			postsMinimalsDtos.add(dto);
 		}
 		
+		entityManager.clear();
 	    // Get the total count
 	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE LOWER(t.nome) IN :tags";
 	    TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
@@ -253,14 +258,18 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		for(Post post : posts) {
 			List<String> tags = post.getTags().stream().map(Tag::getNome).collect(Collectors.toList());
 			post.setTags(null);
-			Integer votos = votoService.countVotesByPost(post.getId());
-			post.setVotos(null);
+			List<Voto> votos = post.getVotos();  // Get the votos collection
+		    post.setVotos(null); 
+			Integer votosCount = 0;
+			 if (votos != null && !votos.isEmpty())
+			        votosCount = votos.size();
 			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
-			dto.setVotos(votos);
+			dto.setVotos(votosCount);
 			dto.setTags(tags);
 			postsMinimalsDtos.add(dto);
 		}
 		
+		entityManager.clear();
 	    // Get the total count
 	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE LOWER(t.nome) = LOWER(:nome)";
 	    TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
@@ -285,7 +294,23 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	}
 
 	public List<PostMinimalDto> getFirstTenPosts(ModelMapper modelMapper) {
-		return  modelMapper.map(repository.findTop10ByOrderByCreatedAtDesc(), new TypeToken<List<PostMinimalDto>>() {}.getType());
+		List<Post> postList = repository.findTop10ByOrderByCreatedAtDesc();
+		List<PostMinimalDto> postsMinimalsDtos = new ArrayList<>();
+		for(Post post : postList) {
+			List<String> tags = post.getTags().stream().map(Tag::getNome).collect(Collectors.toList());
+			post.setTags(null);
+			List<Voto> votosCopy = new ArrayList<>(post.getVotos());  // Create a copy of the votos collection
+	        post.setVotos(null);
+	        Integer votosCount = 0;
+	        if (votosCopy != null && !votosCopy.isEmpty())
+	            votosCount = votosCopy.size();
+			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
+			dto.setVotos(votosCount);
+			dto.setTags(tags);
+			postsMinimalsDtos.add(dto);
+		}
+		entityManager.clear();
+		return postsMinimalsDtos;
 	}
 
 	public PostPageDto findPostsPageable(ModelMapper modelMapper, String order, Integer pageNumber, Integer pageSize) {
@@ -306,17 +331,19 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		for(Post post : posts) {
 			List<String> tags = post.getTags().stream().map(Tag::getNome).collect(Collectors.toList());
 			post.setTags(null);
-			Integer votos = 0;
-			if(post.getVotos() != null)
-				 votos = votoService.countVotesByPost(post.getId());
-			post.setVotos(null);
+			List<Voto> votos = post.getVotos();  // Get the votos collection
+		    post.setVotos(null); 
+			Integer votosCount = 0;
+			 if (votos != null && !votos.isEmpty())
+			        votosCount = votos.size();
 			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
-			dto.setVotos(votos);
+			dto.setVotos(votosCount);
 			dto.setTags(tags);
 			postsMinimalsDtos.add(dto);
 		}
 		
-	
+		entityManager.clear();
+		
 		// Get the total count
 		String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p";
 		TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);

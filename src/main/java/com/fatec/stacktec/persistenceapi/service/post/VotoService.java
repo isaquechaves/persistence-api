@@ -38,7 +38,7 @@ public class VotoService extends CrudServiceJpaImpl<VotoRepository, Voto>{
 	    Integer voteCount = repository.countVotesByPost(post);
 	    return voteCount == 0 ? null : voteCount;
 
-	}
+	}	
 
 	public boolean removeVoto(Long usuarioId, Long postId) {
 		Voto voto = repository.findByPostAndUsuarioIds(postId, usuarioId);
