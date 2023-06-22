@@ -42,14 +42,11 @@ import lombok.ToString;
 
 
 
-//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Entity
 @Data
-//@EqualsAndHashCode(callSuper = false, exclude = "tags")
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "post")
-//@EntityListeners
 public class Post extends IdentityGeneratorIdentifierEntity<Long> implements Serializable{
 	
 	@NotNull
@@ -93,6 +90,11 @@ public class Post extends IdentityGeneratorIdentifierEntity<Long> implements Ser
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "disciplina_id", foreignKey = @ForeignKey(name = "fk_disciplina_post"))
 	private Disciplina disciplina;
+	
+	@OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST},
+			fetch = FetchType.LAZY, mappedBy = "post",
+			orphanRemoval = true)
+	private List<Voto> votos = new ArrayList<>();
 		
 	@Column
 	@CreatedDate

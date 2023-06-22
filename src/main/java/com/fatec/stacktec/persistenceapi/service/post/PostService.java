@@ -49,8 +49,7 @@ import lombok.extern.java.Log;
 @Log
 @Service
 public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
-	
-	
+		
 	@Autowired
     private EntityManager entityManager;
 	
@@ -68,6 +67,9 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	
 	@Autowired
 	private UserInternalService userService;
+	
+	@Autowired
+	private VotoService votoService;
 	
 	@Transactional
 	public Post updatePost(ModelMapper modelMapper, PostDto dto) {
@@ -214,8 +216,18 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	    query.setMaxResults(pageSize);
 	    
 	    List<Post> posts = query.getResultList();
-	    List<PostMinimalDto> postsMinimalsDtos = modelMapper.map(posts, new TypeToken<List<PostMinimalDto>>() {}.getType());
-
+	    List<PostMinimalDto> postsMinimalsDtos = new ArrayList<>();
+		for(Post post : posts) {
+			List<String> tagsDto = post.getTags().stream().map(Tag::getNome).collect(Collectors.toList());
+			post.setTags(null);
+			Integer votos = votoService.countVotesByPost(post.getId());
+			post.setVotos(null);
+			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
+			dto.setVotos(votos);
+			dto.setTags(tagsDto);
+			postsMinimalsDtos.add(dto);
+		}
+		
 	    // Get the total count
 	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE LOWER(t.nome) IN :tags";
 	    TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
@@ -237,8 +249,18 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	    
 	    
 	    List<Post> posts = query.getResultList();
-	    List<PostMinimalDto> postsMinimalsDtos = modelMapper.map(posts, new TypeToken<List<PostMinimalDto>>() {}.getType());
-
+	    List<PostMinimalDto> postsMinimalsDtos = new ArrayList<>();
+		for(Post post : posts) {
+			List<String> tags = post.getTags().stream().map(Tag::getNome).collect(Collectors.toList());
+			post.setTags(null);
+			Integer votos = votoService.countVotesByPost(post.getId());
+			post.setVotos(null);
+			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
+			dto.setVotos(votos);
+			dto.setTags(tags);
+			postsMinimalsDtos.add(dto);
+		}
+		
 	    // Get the total count
 	    String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE LOWER(t.nome) = LOWER(:nome)";
 	    TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
@@ -278,9 +300,22 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	   
 		query.setFirstResult((pageNumber - 1) * pageSize);
 		query.setMaxResults(pageSize);
-	   
 		List<Post> posts = query.getResultList();
-		List<PostMinimalDto> postsMinimalsDtos = modelMapper.map(posts, new TypeToken<List<PostMinimalDto>>() {}.getType());
+		
+		List<PostMinimalDto> postsMinimalsDtos = new ArrayList<>();
+		for(Post post : posts) {
+			List<String> tags = post.getTags().stream().map(Tag::getNome).collect(Collectors.toList());
+			post.setTags(null);
+			Integer votos = 0;
+			if(post.getVotos() != null)
+				 votos = votoService.countVotesByPost(post.getId());
+			post.setVotos(null);
+			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
+			dto.setVotos(votos);
+			dto.setTags(tags);
+			postsMinimalsDtos.add(dto);
+		}
+		
 	
 		// Get the total count
 		String countJpql = "SELECT COUNT(DISTINCT p) FROM Post p";

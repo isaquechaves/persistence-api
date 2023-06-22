@@ -51,4 +51,10 @@ public class PostDto {
 	
 	@JsonProperty
 	private PostStatus postStatus;
+	
+	@JsonProperty
+	private Integer votos;
+	
+	@JsonProperty
+	private boolean votado;
 }

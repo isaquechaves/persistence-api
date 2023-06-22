@@ -43,6 +43,7 @@ import com.fatec.stacktec.persistenceapi.model.post.Disciplina;
 import com.fatec.stacktec.persistenceapi.model.post.Post;
 import com.fatec.stacktec.persistenceapi.model.post.Resposta;
 import com.fatec.stacktec.persistenceapi.model.post.Tag;
+import com.fatec.stacktec.persistenceapi.model.post.Voto;
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
 import com.fatec.stacktec.persistenceapi.model.util.BaseModel;
 import com.fatec.stacktec.persistenceapi.service.post.ComentarioService;
@@ -50,6 +51,7 @@ import com.fatec.stacktec.persistenceapi.service.post.DisciplinaService;
 import com.fatec.stacktec.persistenceapi.service.post.PostService;
 import com.fatec.stacktec.persistenceapi.service.post.RespostaService;
 import com.fatec.stacktec.persistenceapi.service.post.TagService;
+import com.fatec.stacktec.persistenceapi.service.post.VotoService;
 import com.fatec.stacktec.persistenceapi.service.user.UserInternalService;
 
 import io.swagger.annotations.Api;
@@ -73,16 +75,19 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 	private final UserInternalService userService;	
 	
 	private final TagService tagService;
+	
+	private final VotoService votoService;
 		
 	public PostControllerRelacional(PostService postService, UserInternalService userService,
 				TagService tagService, RespostaService respostaService, ComentarioService comentarioService,
-				DisciplinaService disciplinaService) {
+				DisciplinaService disciplinaService, VotoService votoService) {
 		this.postService = postService;
 		this.userService = userService;
 		this.tagService = tagService;
 		this.respostaService = respostaService;
 		this.comentarioService = comentarioService;
 		this.disciplinaService = disciplinaService;
+		this.votoService = votoService;
 	}
 
 	
@@ -212,8 +217,62 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		
 		return ResponseEntity.noContent().build();
 	}
+	
+	@ApiOperation(value = "Vote post")
+	@PutMapping("/v1.1/voto/{id}")
+	@Transactional
+	public ResponseEntity votePost(@PathVariable(value = "id") Long postId) {
+				
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		Voto voto = new Voto();
+					
+		Post post = service.findById(postId);
+		if(post != null)
+			voto.setPost(post);
 		
-
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    String name = auth.getName();
+		UserInternal user = userService.findByEmail(name);
+		
+		if(user != null)
+			voto.setUsuario(user);
+		
+		Voto votoCreated = votoService.createElement(voto);
+		
+		if(votoCreated != null) {						
+			ObjectNode response = objectMapper.createObjectNode();								
+			response.put("id", ((BaseModel<Long>) (votoCreated)).getId());
+			return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		}
+		
+		return ResponseEntity.noContent().build();
+	}
+	
+	@ApiOperation(value = "Update post")
+	@DeleteMapping("/v1.1/removeVoto/{id}")
+	@Transactional
+	public ResponseEntity removeVotoPost(@PathVariable(value = "id") Long postId) {
+				
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+	
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    String name = auth.getName();
+		UserInternal user = userService.findByEmail(name);
+	
+		
+		boolean apagou = votoService.removeVoto(user.getId(), postId);
+		
+		if(apagou == true) {								
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+		}
+		
+		return ResponseEntity.noContent().build();
+	}
+		
 
 	@Override
 	protected List<?> convertToListDto(List<Post> postList) {
@@ -231,6 +290,7 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		List<Resposta> respostas = new ArrayList<>();
 		List<Comentario> comentariosPost = new ArrayList<>();
 		List<Tag> tags = new ArrayList<>(); 
+		post.setVotos(null);
 		
 		if(post.getDisciplina() != null) {
 			disciplina = post.getDisciplina();
@@ -260,6 +320,10 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		}
 		
 		PostDto postDto = modelMapper.map(post, PostDto.class);
+		
+		postDto.setVotos(votoService.countVotesByPost(postDto.getId()));
+		
+		postDto.setVotado(votoService.userHasVotedInPost(autor.getId(), post.getId()));
 		
 		if(respostas != null) {
 			Set<String> listTagsDto = new HashSet<>();
