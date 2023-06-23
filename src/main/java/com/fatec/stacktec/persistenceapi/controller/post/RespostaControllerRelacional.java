@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fatec.stacktec.persistenceapi.controller.BaseController;
+import com.fatec.stacktec.persistenceapi.dto.post.PostComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaComentarioDto;
 import com.fatec.stacktec.persistenceapi.dto.post.RespostaDto;
 import com.fatec.stacktec.persistenceapi.enumeration.BusinessExceptionCode;
@@ -188,6 +189,8 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 	protected Object convertToDetailDto(Resposta resposta) {		
 		UserInternal autor = null;
 		Post post = null;
+		List<Comentario> comentariosResposta = new ArrayList<>();
+
 		
 		if(resposta.getAutor() != null) {
 			autor = resposta.getAutor();
@@ -197,20 +200,25 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 		if(resposta.getPost() != null) {
 			post = resposta.getPost();
 			resposta.setPost(null);
-		}			
+		}		
 		
 		if(resposta.getComentarios() != null) {
-			List<Comentario> listComentario = new ArrayList<>();
-			for(Comentario comentario: resposta.getComentarios()) {
-				listComentario.add(comentario);
-			}
-			resposta.setComentarios(listComentario);
-		}
+			comentariosResposta = resposta.getComentarios();
+			resposta.setComentarios(null);
+		}	
+					
 		
 		RespostaDto respostaDto = modelMapper.map(resposta, RespostaDto.class);								
+		
 		if(autor != null) {
 			respostaDto.setAutorId(autor.getId());
 		}	
+		
+		if(comentariosResposta != null) {		
+			List<RespostaComentarioDto> comentariosDtoPost =  ComentarioService.mapComentariosDtoParaRespostas(
+					comentariosResposta, modelMapper, userService);
+			respostaDto.setComentarios(comentariosDtoPost);		
+		}
 		
 		if(post != null) {
 			respostaDto.setPostId(post.getId());
@@ -291,23 +299,22 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 				resposta.setPost(null);
 			}			
 			
+
 			if(resposta.getComentarios() != null) {
-				for(Comentario comentario: resposta.getComentarios()) {
-					comentariosResposta.add(comentario);
-				}
+				comentariosResposta = resposta.getComentarios();
 				resposta.setComentarios(null);
-			}
+			}	
+					
 			
 			RespostaDto respostaDto = modelMapper.map(resposta, RespostaDto.class);								
 			if(autor != null) {
 				respostaDto.setAutorId(autor.getId());
 			}	
 			
-			if(comentariosResposta != null) {
-				List<RespostaComentarioDto> comentariosDtoResposta =  ComentarioService.mapComentariosDtoParaRespostas(
+			if(comentariosResposta != null) {		
+				List<RespostaComentarioDto> comentariosDtoPost =  ComentarioService.mapComentariosDtoParaRespostas(
 						comentariosResposta, modelMapper, userService);
-				
-				respostaDto.setComentarios(comentariosDtoResposta);
+				respostaDto.setComentarios(comentariosDtoPost);		
 			}
 			
 			if(post != null) {
