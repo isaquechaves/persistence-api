@@ -38,6 +38,7 @@ import com.fatec.stacktec.persistenceapi.exception.BusinessException;
 import com.fatec.stacktec.persistenceapi.model.post.Comentario;
 import com.fatec.stacktec.persistenceapi.model.post.Post;
 import com.fatec.stacktec.persistenceapi.model.post.Resposta;
+import com.fatec.stacktec.persistenceapi.model.user.Role;
 import com.fatec.stacktec.persistenceapi.model.user.UserInternal;
 import com.fatec.stacktec.persistenceapi.model.util.BaseModel;
 import com.fatec.stacktec.persistenceapi.service.post.ComentarioService;
@@ -107,7 +108,7 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 		if(post.getPostStatus().getStatus().equals(PostStatus.FECHADO.getStatus())) {
 			throw new BusinessException(BusinessExceptionCode.POST_FECHADO, "Este post está fechado e não aceita respostas no momento");
 		}
-		
+		respostaDto.setAceita(null); //Garante que a resposta criada seja sempre não aceita previamente	
 		Resposta converted = convertToModel(respostaDto);
 		Resposta elementCreated = (Resposta) respostaService.createElement(converted);
 		if(elementCreated != null) {						
@@ -139,7 +140,7 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 	}
 	
 	@ApiOperation(value = "Aceitar resposta")
-	@PutMapping("/v1.1/aceita/{id}")
+	@PutMapping("/v1.1/aceitar/{id}")
 	@Transactional
 	public ResponseEntity aceitaResposta(@PathVariable(value = "id") Long respostaId) {
 				
@@ -151,8 +152,10 @@ public class RespostaControllerRelacional extends BaseController<RespostaService
 		UserInternal autorPost = userService.getOne(post.getAutor().getId());
 		
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		 String name = auth.getName();
-		if(autorPost.getEmail().equals(name)) {
+		UserInternal usuarioLogado = userService.findByEmail(auth.getName());
+		String name = auth.getName();
+		List<String> roles = usuarioLogado.getRoles().stream().map(Role::getName).collect(Collectors.toList());
+		if(autorPost.getEmail().equals(name) || roles.contains("ROLE_ADMIN")) {
 			resposta.setAceita(true);
 			Resposta elementUpdated = (Resposta) respostaService.updateElement(respostaId, resposta);
 			post.setPostStatus(PostStatus.RESPONDIDO);
