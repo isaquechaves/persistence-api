@@ -350,4 +350,55 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		Integer totalPages = total.intValue();
 		return new PostPageDto(totalResults, totalPages, postsMinimalsDtos);
 	}
+	
+
+	public PostPageDto searchPostsByTitle(String searchString, ModelMapper modelMapper) {	
+		Integer pageSize = 10;
+	    String[] searchWords = searchString.split(" ");
+
+	    // Create the JPQL query
+	    StringBuilder jpqlQuery = new StringBuilder("SELECT p FROM Post p WHERE ");
+
+	    // Add the LIKE conditions for each word in the search string
+	    for (int i = 0; i < searchWords.length; i++) {
+	        jpqlQuery.append("p.titulo LIKE :searchWord").append(i);
+	        if (i < searchWords.length - 1) {
+	            jpqlQuery.append(" or ");
+	        }
+	    }
+
+	    // Execute the query
+	    TypedQuery<Post> query = entityManager.createQuery(jpqlQuery.toString(), Post.class);
+
+	    // Set the search word parameters
+	    for (int i = 0; i < searchWords.length; i++) {
+	        query.setParameter("searchWord" + i, "%" + searchWords[i] + "%");
+	    }
+
+	    List<Post> posts = query.getResultList();
+	    
+	    
+	    List<PostMinimalDto> postsMinimalsDtos = new ArrayList<>();
+		for(Post post : posts) {
+			List<String> tags = post.getTags().stream().map(Tag::getNome).collect(Collectors.toList());
+			post.setTags(null);
+			List<Voto> votos = post.getVotos();  // Get the votos collection
+		    post.setVotos(null); 
+			Integer votosCount = 0;
+			 if (votos != null && !votos.isEmpty())
+			        votosCount = votos.size();
+			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
+			dto.setVotos(votosCount);
+			dto.setTags(tags);
+			postsMinimalsDtos.add(dto);
+		}
+		
+		entityManager.clear();
+
+		Long total = (long) postsMinimalsDtos.size();
+	    Integer totalResults = Double.valueOf(Math.ceil(total / (double) pageSize)).intValue();
+	    Integer totalPages = total.intValue();
+		
+		return new PostPageDto(totalResults, totalPages, postsMinimalsDtos);
+	}
 }

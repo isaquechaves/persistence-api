@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -101,6 +102,20 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		Post element = (Post) service.getOne(elementId);
 		if(element != null) {
 			return ResponseEntity.ok(convertToDetailDto(element));
+		}		
+		return ResponseEntity.noContent().build();
+	}
+	
+	@ApiOperation(value = "Get post by id")
+	@GetMapping("/v1.1/search/{searchString}")
+	@Transactional(readOnly = true)
+	public ResponseEntity getPostById(@PathVariable String searchString) {
+		if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		PostPageDto postsPaginated = service.searchPostsByTitle(searchString, modelMapper);
+		if(postsPaginated != null && !ObjectUtils.isEmpty(postsPaginated)) {
+			return ResponseEntity.ok(postsPaginated);
 		}		
 		return ResponseEntity.noContent().build();
 	}
