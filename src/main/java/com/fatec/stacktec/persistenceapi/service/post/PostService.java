@@ -249,8 +249,7 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 	    
 	    query.setFirstResult((page - 1) * pageSize);
 	    query.setMaxResults(pageSize);
-	    
-	    
+	   
 	    List<Post> posts = query.getResultList();
 	    List<PostMinimalDto> postsMinimalsDtos = new ArrayList<>();
 		for(Post post : posts) {
@@ -258,10 +257,16 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 			post.setTags(null);
 			List<Voto> votos = post.getVotos();  // Get the votos collection
 		    post.setVotos(null); 
-			Integer votosCount = 0;
-			 if (votos != null && !votos.isEmpty())
-			        votosCount = votos.size();
+		    Integer votosCount = 0;
+		    List<Resposta> respostas = post.getRespostas();  // Get the respostas collection
+		    post.setRespostas(null);			
+			Integer respostaCount = 0;
+			if (votos != null && !votos.isEmpty())				
+		        votosCount = votos.size();
+			if (respostas != null && !respostas.isEmpty())				
+				respostaCount = respostas.size();
 			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
+			dto.setRespostas(respostaCount);
 			dto.setVotos(votosCount);
 			dto.setTags(tags);
 			postsMinimalsDtos.add(dto);
@@ -300,9 +305,15 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 			List<Voto> votosCopy = new ArrayList<>(post.getVotos());  // Create a copy of the votos collection
 	        post.setVotos(null);
 	        Integer votosCount = 0;
+	        List<Resposta> respostas = post.getRespostas();  // Get the respostas collection
+		    post.setRespostas(null);	
+			Integer respostaCount = 0;
+		    if (respostas != null && !respostas.isEmpty())	
+		    	respostaCount = respostas.size();
 	        if (votosCopy != null && !votosCopy.isEmpty())
 	            votosCount = votosCopy.size();
 			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
+			dto.setRespostas(respostaCount);
 			dto.setVotos(votosCount);
 			dto.setTags(tags);
 			postsMinimalsDtos.add(dto);
@@ -317,6 +328,8 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 			jpql = "SELECT p FROM Post p  ORDER BY p.criadoEm DESC";
 		}else if(order.equals("antigos")) {
 			jpql = "SELECT p from Post p ORDER by p.criadoEm ASC";
+		}else if (order.equals("maisvotados")) {
+			jpql = "SELECT p FROM Post p LEFT JOIN p.votos v GROUP BY p ORDER BY COUNT(v) DESC";
 		}
 	   
 		TypedQuery<Post> query = entityManager.createQuery(jpql, Post.class);
@@ -332,9 +345,15 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 			List<Voto> votos = post.getVotos();  // Get the votos collection
 		    post.setVotos(null); 
 			Integer votosCount = 0;
-			 if (votos != null && !votos.isEmpty())
-			        votosCount = votos.size();
+			List<Resposta> respostas = post.getRespostas();  // Get the respostas collection
+		    post.setRespostas(null);	
+			Integer respostaCount = 0;
+		    if (respostas != null && !respostas.isEmpty())	
+	    		respostaCount = respostas.size();
+		    if (votos != null && !votos.isEmpty())
+		        votosCount = votos.size();
 			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
+			dto.setRespostas(respostaCount);
 			dto.setVotos(votosCount);
 			dto.setTags(tags);
 			postsMinimalsDtos.add(dto);
@@ -385,9 +404,15 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 			List<Voto> votos = post.getVotos();  // Get the votos collection
 		    post.setVotos(null); 
 			Integer votosCount = 0;
-			 if (votos != null && !votos.isEmpty())
-			        votosCount = votos.size();
+			List<Resposta> respostas = post.getRespostas();  // Get the respostas collection
+		    post.setRespostas(null);	
+			Integer respostaCount = 0;
+		    if (respostas != null && !respostas.isEmpty())	
+		    	respostaCount = respostas.size();
+		    if (votos != null && !votos.isEmpty())
+		        votosCount = votos.size();
 			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
+			dto.setRespostas(respostaCount);
 			dto.setVotos(votosCount);
 			dto.setTags(tags);
 			postsMinimalsDtos.add(dto);

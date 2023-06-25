@@ -27,6 +27,9 @@ public class PostMinimalDto implements Serializable{
 	@JsonProperty
 	private Integer votos;
 	
+	@JsonProperty 
+	private Integer respostas;
+	
 	@JsonProperty
 	private List<String> tags;
 
