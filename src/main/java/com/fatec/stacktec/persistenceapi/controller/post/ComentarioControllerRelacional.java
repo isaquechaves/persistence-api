@@ -137,14 +137,14 @@ public class ComentarioControllerRelacional extends BaseController<ComentarioSer
 			comentario.setResposta(null);
 		}
 		
-		ComentarioDto comentarioDto = modelMapper.map(resposta, ComentarioDto.class);
+		ComentarioDto comentarioDto = modelMapper.map(comentario, ComentarioDto.class);
 		if(autor != null) {
 			comentarioDto.setAutor(autor.getId());
 		}
 		if(post != null) {
 			comentarioDto.setPostId(post.getId());
 		}
-		if(autor != null) {
+		if(resposta != null) {
 			comentarioDto.setRespostaId(resposta.getId());
 		}
 		
