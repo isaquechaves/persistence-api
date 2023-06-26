@@ -9,5 +9,7 @@ import com.fatec.stacktec.persistenceapi.service.CrudServiceJpaImpl;
 @Service
 public class RoleService extends CrudServiceJpaImpl<RoleRepository, Role>{
 		
-
+	public Role findByName(String name) {
+		return repository.findByName(name);
+	}
 }

@@ -224,8 +224,13 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 			List<Voto> votos = post.getVotos();  // Get the votos collection
 		    post.setVotos(null); 
 			Integer votosCount = 0;
+		    List<Resposta> respostas = post.getRespostas();  // Get the respostas collection
+			post.setRespostas(null);	
+			Integer respostaCount = 0;
+		    if(respostas != null && !respostas.isEmpty())	
+		    	respostaCount = respostas.size();
 			 if (votos != null && !votos.isEmpty())
-			        votosCount = votos.size();
+		        votosCount = votos.size();
 			PostMinimalDto dto = modelMapper.map(post, PostMinimalDto.class);
 			dto.setVotos(votosCount);
 			dto.setTags(tags);

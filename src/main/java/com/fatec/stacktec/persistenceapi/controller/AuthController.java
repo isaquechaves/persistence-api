@@ -51,6 +51,7 @@ import com.fatec.stacktec.persistenceapi.payload.response.UserInfoResponse;
 import com.fatec.stacktec.persistenceapi.repository.user.RoleRepository;
 import com.fatec.stacktec.persistenceapi.repository.user.UserInternalRepository;
 import com.fatec.stacktec.persistenceapi.security.jwt.JwtUtils;
+import com.fatec.stacktec.persistenceapi.service.user.RoleService;
 import com.fatec.stacktec.persistenceapi.service.user.UserInternalService;
 
 import io.swagger.annotations.Api;
@@ -74,7 +75,7 @@ public class AuthController extends BaseController<UserInternalService, UserInte
     private UserInternalService userService;
     
     @Autowired
-    private RoleRepository roleRepository;
+    private RoleService roleService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -181,20 +182,25 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	    }
     }
     
+    @ApiOperation(value = "Update user")
     @PutMapping("/v1.1/{id}")
 	@Transactional
     public ResponseEntity updateElement(@PathVariable(value = "id") Long id,
-										@Valid @RequestBody UserInternalDto userInternalDto) {
-    	
+										@Valid @RequestBody UserInternalDto userInternalDto) {    		    	    
     	Cache cache = cacheManager.getCache("usersCache");
 	    String cacheKey = userInternalDto.getEmail();
-	    ValueWrapper valueWrapper = cache.get(cacheKey);	    	    
-	    if (valueWrapper != null) {
+	    ValueWrapper valueWrapper = cache.get(cacheKey);	   
+		
+	    if (valueWrapper != null) { 
+	    	String inputToken = (String) valueWrapper.get();
+	    	int startIndex = inputToken.indexOf('=') + 1;
+	    	int endIndex = inputToken.indexOf(';');
+	    	String jwtTokenSplit = inputToken.substring(startIndex, endIndex);
 	        // User is already authenticated, return the cached token
-		    String username = jwtUtils.getUserNameFromJwtToken((String)valueWrapper.get());
-	        if(username.equals(userInternalDto.getEmail())){
-	        	UserInternal converted = convertToModel(userInternalDto);
-	    		UserInternal elementUpdated = (UserInternal) userService.updateElement(id, converted);
+		    String username = jwtUtils.getUserNameFromJwtToken(jwtTokenSplit);		    
+		    
+	        if(username.equals(userInternalDto.getEmail()) ){	        	
+	        	UserInternal elementUpdated = service.updateUsuario(modelMapper, id, userInternalDto);
 	    		if(elementUpdated != null) {
 	    			ObjectNode response = objectMapper.createObjectNode();
 	    			response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
@@ -203,9 +209,39 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	        }else {
 	        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 	        }
+        }else{	  
+     	    
+    	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    	    String name = auth.getName();
+    		UserInternal usuarioLogado = service.findByEmail(name);
+		    List<String> roles = usuarioLogado.getRoles().stream().map(Role::getName).collect(Collectors.toList());		    
+	        if(roles.contains("ROLE_ADMIN")){
+	        	UserInternal elementUpdated = service.updateUsuarioByAdmin(modelMapper, id, userInternalDto);
+	    		if(elementUpdated != null) {
+	    			ObjectNode response = objectMapper.createObjectNode();
+	    			response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
+	    			return ResponseEntity.status(HttpStatus.OK).body(response);
+	    		}	        	        	
+	        }else {
+	        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	        }
 	    }
     	return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    
+    @GetMapping("/v1.1/all/{pageNumber}/{pageSize}")
+  	@Transactional
+  	@Validated
+  	public ResponseEntity getAllUsersPaginated(@PathVariable Integer pageNumber, @PathVariable  Integer pageSize) {
+      	
+    	if (!SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+    	
+      	UserInternalPageDto paginatedUsers = service.findAllUsersPaginated(modelMapper, pageNumber, pageSize);
+      	
+      	return ResponseEntity.ok(paginatedUsers);
+  }
     
     @GetMapping("/v1.1/{pageNumber}/{pageSize}/{email}")
   	@Transactional
@@ -219,7 +255,7 @@ public class AuthController extends BaseController<UserInternalService, UserInte
       	UserInternalPageDto paginatedUsers = service.findUsersByEmailPaginated(modelMapper, pageNumber, pageSize, email);
       	
       	return ResponseEntity.ok(paginatedUsers);
-  }
+    }
     
 	private UserInternal convertToModelCreate(UserInternalDtoMinimal dto, UserInternal base) {
 		UserInternal user = new UserInternal(dto.getEmail(), passwordEncoder.encode(dto.getPassword()));
@@ -227,7 +263,7 @@ public class AuthController extends BaseController<UserInternalService, UserInte
         user.setApelido(dto.getApelido());
 		
 		Set<Role> rolesUser = new HashSet<>();
-		rolesUser.add(roleRepository.findByName("ROLE_ALUNO"));
+		rolesUser.add(roleService.findByName("ROLE_ALUNO"));
 		user.setRoles(rolesUser);
 			
 		user.setRoles(rolesUser);
@@ -242,20 +278,20 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 		if(base != null &&  !ObjectUtils.isEmpty(base)) {
 			user = base;
 		}else { 
-			user = new UserInternal(dto.getEmail(), passwordEncoder.encode(dto.getPassword()));
+			user = service.findByEmail(dto.getEmail());
 		}
 		
         user.setApelido(dto.getApelido());
 		
 		Set<Role> rolesUser = new HashSet<>();
 		for(String roleName : dto.getRoles()) {
-			rolesUser.add(roleRepository.findByName(roleName));
+			rolesUser.add(roleService.findByName(roleName));
 		}			
 		user.setRoles(rolesUser);
 		user.setName(dto.getName());
 		user.setSemestre(dto.getSemestre());
 		user.setPassword(passwordEncoder.encode(dto.getPassword()));
-		return user;
+		return user;		
 	}
 
 	@Override

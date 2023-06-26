@@ -37,8 +37,8 @@ import lombok.ToString;
 @ToString(exclude = {"roles", "posts", "respostas"})
 @Entity
 @Table(name = "userInternal")
-public class UserInternal extends IdentityGeneratorIdentifierEntity<Long> implements Serializable {
-	
+public class UserInternal extends IdentityGeneratorIdentifierEntity<Long> implements Serializable {	
+
 	@Column(nullable = false, columnDefinition = "boolean default true")
 	boolean enabled = true;
 	
