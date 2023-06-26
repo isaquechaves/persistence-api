@@ -187,45 +187,35 @@ public class AuthController extends BaseController<UserInternalService, UserInte
 	@Transactional
     public ResponseEntity updateElement(@PathVariable(value = "id") Long id,
 										@Valid @RequestBody UserInternalDto userInternalDto) {    		    	    
-    	Cache cache = cacheManager.getCache("usersCache");
-	    String cacheKey = userInternalDto.getEmail();
-	    ValueWrapper valueWrapper = cache.get(cacheKey);	   
-		
-	    if (valueWrapper != null) { 
-	    	String inputToken = (String) valueWrapper.get();
-	    	int startIndex = inputToken.indexOf('=') + 1;
-	    	int endIndex = inputToken.indexOf(';');
-	    	String jwtTokenSplit = inputToken.substring(startIndex, endIndex);
-	        // User is already authenticated, return the cached token
-		    String username = jwtUtils.getUserNameFromJwtToken(jwtTokenSplit);		    
-		    
-	        if(username.equals(userInternalDto.getEmail()) ){	        	
+	   
+	    Authentication authAluno = SecurityContextHolder.getContext().getAuthentication();
+	    String nameAluno = authAluno.getName();
+		UserInternal usuarioLogadoAluno = service.findByEmail(nameAluno);
+	    if (usuarioLogadoAluno != null) { 	    
+	        if(usuarioLogadoAluno.getEmail().equals(userInternalDto.getEmail()) ){	        	
 	        	UserInternal elementUpdated = service.updateUsuario(modelMapper, id, userInternalDto);
 	    		if(elementUpdated != null) {
 	    			ObjectNode response = objectMapper.createObjectNode();
 	    			response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
 	    			return ResponseEntity.status(HttpStatus.OK).body(response);
 	    		}
-	        }else {
-	        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	        }else{	  	     	    
+	    	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    	    String name = auth.getName();
+	    		UserInternal usuarioLogado = service.findByEmail(name);
+			    List<String> roles = usuarioLogado.getRoles().stream().map(Role::getName).collect(Collectors.toList());		    
+		        if(roles.contains("ROLE_ADMIN")){
+		        	UserInternal elementUpdated = service.updateUsuarioByAdmin(modelMapper, id, userInternalDto);
+		    		if(elementUpdated != null) {
+		    			ObjectNode response = objectMapper.createObjectNode();
+		    			response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
+		    			return ResponseEntity.status(HttpStatus.OK).body(response);
+		    		}	        	        	
+		        }else {
+		        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		        }
 	        }
-        }else{	  
-     	    
-    	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    	    String name = auth.getName();
-    		UserInternal usuarioLogado = service.findByEmail(name);
-		    List<String> roles = usuarioLogado.getRoles().stream().map(Role::getName).collect(Collectors.toList());		    
-	        if(roles.contains("ROLE_ADMIN")){
-	        	UserInternal elementUpdated = service.updateUsuarioByAdmin(modelMapper, id, userInternalDto);
-	    		if(elementUpdated != null) {
-	    			ObjectNode response = objectMapper.createObjectNode();
-	    			response.put("id", ((BaseModel<Long>) (elementUpdated)).getId());
-	    			return ResponseEntity.status(HttpStatus.OK).body(response);
-	    		}	        	        	
-	        }else {
-	        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-	        }
-	    }
+        }	    
     	return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     
