@@ -239,9 +239,12 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 		
 		entityManager.clear();
 	    // Get the total count
+		Long totalCount = entityManager.createQuery("SELECT COUNT(DISTINCT p) FROM Post p JOIN p.tags t WHERE LOWER(t.nome) IN :tags", Long.class)
+		        .setParameter("tags", lowercaseTags)
+		        .getSingleResult();
 
-	    Long total = (long) postsMinimalsDtos.size();
-	    Integer totalResults = Double.valueOf(Math.ceil(total / (double) pageSize)).intValue();
+		Integer totalResults = (int) Math.ceil(totalCount / (double) pageSize);
+	    Integer total = posts.size();
 	    Integer totalPages = total.intValue();
 	    return new PostPageDto(totalResults, totalPages, postsMinimalsDtos);
 	}
