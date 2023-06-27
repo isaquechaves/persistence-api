@@ -381,15 +381,14 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 
 	public PostPageDto searchPostsByTitle(String searchString, ModelMapper modelMapper) {	
 		Integer pageSize = 10;
-	    String[] searchWords = searchString.split(" ");
-
+		String[] searchWords = searchString.split("\\+");
+		
 	    // Create the JPQL query
 	    StringBuilder jpqlQuery = new StringBuilder("SELECT p FROM Post p WHERE ");
 
 	    // Add the LIKE conditions for each word in the search string
 	    for (int i = 0; i < searchWords.length; i++) {
-	        jpqlQuery.append("p.titulo LIKE :searchWord").append(i);
-	        if (i < searchWords.length - 1) {
+	        jpqlQuery.append("LOWER(p.titulo) LIKE LOWER(:searchWord").append(i).append(")");	        if (i < searchWords.length - 1) {
 	            jpqlQuery.append(" or ");
 	        }
 	    }
@@ -399,8 +398,8 @@ public class PostService extends CrudServiceJpaImpl<PostRepository, Post>{
 
 	    // Set the search word parameters
 	    for (int i = 0; i < searchWords.length; i++) {
-	        query.setParameter("searchWord" + i, "%" + searchWords[i] + "%");
-	    }
+	    	 query.setParameter("searchWord" + i, "%" + searchWords[i] + "%");
+    	 }
 
 	    List<Post> posts = query.getResultList();
 	    

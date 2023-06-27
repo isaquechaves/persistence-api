@@ -338,7 +338,10 @@ public class PostControllerRelacional extends BaseController<PostService, Post, 
 		
 		postDto.setVotos(votoService.countVotesByPost(postDto.getId()));
 		
-		postDto.setVotado(votoService.userHasVotedInPost(autor.getId(), post.getId()));
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    String name = auth.getName();
+		UserInternal user = userService.findByEmail(name);
+		postDto.setVotado(votoService.userHasVotedInPost(user.getId(), post.getId()));
 		
 		if(respostas != null) {
 			Set<String> listTagsDto = new HashSet<>();
